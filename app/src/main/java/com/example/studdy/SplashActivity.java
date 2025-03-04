@@ -24,19 +24,15 @@ public class SplashActivity extends AppCompatActivity {
             public void run() {
                 Intent intent;
                 if (isFirstLaunch) {
-                    // If first launch, show the onboarding sliders
                     intent = new Intent(SplashActivity.this, OnboardingActivity.class);
-
-                    // Update the flag to indicate the user has seen the sliders
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putBoolean("isFirstLaunch", false);
                     editor.apply();
                 } else {
-                    // Otherwise, go to MainActivity
-                    intent = new Intent(SplashActivity.this, MainActivity.class);
+                    // Go to LoginActivity instead of MainActivity
+                    intent = new Intent(SplashActivity.this, LoginActivity.class);
                 }
                 startActivity(intent);
-                // Apply fade transition (optional)
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                 finish();
             }

@@ -28,7 +28,12 @@
             android:name=".OnboardingActivity"
             android:exported="false" />
 
-        <!-- Main Activity (not a launcher activity) -->
+        <!-- Login Activity -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />

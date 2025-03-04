@@ -64,7 +64,7 @@ public class OnboardingActivity extends AppCompatActivity {
                 viewPager.setCurrentItem(current + 1);
             } else {
                 // Last slide, go to MainActivity
-                startActivity(new Intent(OnboardingActivity.this, MainActivity.class));
+                startActivity(new Intent(OnboardingActivity.this, LoginActivity.class));
                 finish();
             }
         });
