@@ -1,11 +1,10 @@
 package com.example.studdy;
 
-import static SMTP.Credentials.SMTP_PASSWORD;
-
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
@@ -25,6 +24,7 @@ import java.util.Properties;
 import java.util.Random;
 
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -33,15 +33,17 @@ import javax.mail.internet.MimeMessage;
 
 public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
-    // SMTP credentials for Gmail
-    private static final String SMTP_EMAIL = "arshadali.app431@gmail.com"; // Your Gmail address
     private ImageView backArrow, passwordToggle;
     private EditText usernameEditText, emailEditText, phoneEditText, passwordEditText;
     private RadioGroup roleRadioGroup;
-    private AppCompatButton signUpButton, goToSignInButton;
+    private AppCompatButton signUpButton;
     private boolean isPasswordVisible = false;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+
+    // SMTP credentials for Gmail
+    private static final String SMTP_EMAIL = "arshadali.app431@gmail.com"; // Your Gmail address
+    private static final String SMTP_PASSWORD = "your-gmail-app-password"; // Replace with your Gmail App Password
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +65,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
         // Back arrow click
         backArrow.setOnClickListener(v -> {
-            finish(); // go back to the previous (LoginActivity)
+            finish(); // Go back to the previous activity (likely LoginActivity)
         });
 
         // Toggle password visibility
@@ -87,13 +89,6 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
             String email = emailEditText.getText().toString().trim();
             String phone = phoneEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
-
-
-            // Basic validation
-//            if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
-//                showErrorPopup("All fields are required!");
-//                return;
-//            }
 
             // Basic validation
             if (username.isEmpty()) {
@@ -199,20 +194,6 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
         return code.toString();
     }
 
-    // Method to show success popup and navigate to LoginActivity
-    private void showSuccessPopup(String staffCode) {
-        new AlertDialog.Builder(this)
-                .setTitle("Registration Successful")
-                .setMessage("Generated staff code sent on your email")
-                .setPositiveButton("OK", (dialog, which) -> {
-                    // Navigate to LoginActivity
-                    startActivity(new Intent(FacultyCodeRegistrationActivity.this, LoginActivity.class));
-                    finish();
-                })
-                .setCancelable(false)
-                .show();
-    }
-
     // AsyncTask to send email in the background
     private class SendEmailTask extends AsyncTask<Void, Void, Boolean> {
         private final String recipientEmail;
@@ -271,5 +252,19 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                         "Failed to send email: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    // Method to show success popup and navigate to LoginActivity
+    private void showSuccessPopup(String staffCode) {
+        new AlertDialog.Builder(this)
+                .setTitle("Registration Successful")
+                .setMessage("Generated staff code sent on your email")
+                .setPositiveButton("OK", (dialog, which) -> {
+                    // Navigate to LoginActivity
+                    startActivity(new Intent(FacultyCodeRegistrationActivity.this, LoginActivity.class));
+                    finish();
+                })
+                .setCancelable(false)
+                .show();
     }
 }

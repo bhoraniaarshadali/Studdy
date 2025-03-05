@@ -25,6 +25,12 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }// Add this block to handle duplicate META-INF files
+    packaging {
+        resources {
+            excludes += ("/META-INF/NOTICE.md")
+            excludes += ("/META-INF/LICENSE.md")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
