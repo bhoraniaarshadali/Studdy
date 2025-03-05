@@ -14,30 +14,32 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.google.android.gms.common.SignInButton;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
 
     private RadioGroup roleRadioGroup;
     private EditText usernameEditText, passwordEditText;
-    private ImageView passwordToggle;
-
+    private ImageView passwordToggle, facultyRegistration;
     private AppCompatButton signInButton;
     private SignInButton googleSignInButton;
-    private TextView forgotPasswordTextView;
+    private TextView forgotPasswordTextView, signUpTextView;
     private boolean isPasswordVisible = false;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Add this with other view initializations
         ImageView facultyRegistration1 = findViewById(R.id.facultyRegistration);
-        // Add this click listener
         facultyRegistration1.setOnClickListener(v -> {
-            Intent intent = new Intent(getApplicationContext(), FacultyCodeRegistrationActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(LoginActivity.this, FacultyCodeRegistrationActivity.class));
         });
+
+
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance();
 
         // Initialize views
         roleRadioGroup = findViewById(R.id.roleRadioGroup);
@@ -52,31 +54,34 @@ public class LoginActivity extends AppCompatActivity {
         passwordToggle.setOnClickListener(v -> {
             if (isPasswordVisible) {
                 passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                passwordToggle.setImageResource(R.drawable.ic_eye); // Show closed eye (or your custom icon)
+                passwordToggle.setImageResource(R.drawable.ic_eye);
                 isPasswordVisible = false;
             } else {
                 passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                passwordToggle.setImageResource(R.drawable.ic_eye); // Update to an open eye icon if you have one
+                passwordToggle.setImageResource(R.drawable.ic_eye);
                 isPasswordVisible = true;
             }
-            // Move cursor to the end of the text
             passwordEditText.setSelection(passwordEditText.getText().length());
         });
 
         // Sign in button click
         signInButton.setOnClickListener(v -> {
-            // Validate inputs
             if (roleRadioGroup.getCheckedRadioButtonId() == -1) {
                 Toast.makeText(LoginActivity.this, "Please select a role", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             String role = ((RadioButton) findViewById(roleRadioGroup.getCheckedRadioButtonId())).getText().toString();
-            String username = usernameEditText.getText().toString().trim();
+            String email = usernameEditText.getText().toString().trim(); // Now using email instead of username
             String password = passwordEditText.getText().toString().trim();
 
-            if (username.isEmpty()) {
-                usernameEditText.setError("Username is required");
+            if (email.isEmpty()) {
+                usernameEditText.setError("Email is required");
+                return;
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                usernameEditText.setError("Enter a valid email address");
                 return;
             }
 
@@ -85,11 +90,27 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            // TODO: Implement actual sign-in logic (e.g., API call, Firebase Auth, etc.)
-            Toast.makeText(LoginActivity.this, "Sign in successful as " + role, Toast.LENGTH_SHORT).show();
-            // Navigate to MainActivity or appropriate screen after successful login
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-            finish();
+            // Sign in with Firebase Authentication
+            auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            // Sign-in successful
+                            Toast.makeText(LoginActivity.this, "Sign in successful as " + role, Toast.LENGTH_SHORT).show();
+                            // Navigate based on role
+                            Intent intent;
+                            if (role.equals("Faculty")) {
+                                intent = new Intent(LoginActivity.this, MainActivity.class); // in future we will replace with faculty dashboard
+                            } else {
+                                intent = new Intent(LoginActivity.this, MainActivity.class);
+                            }
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(LoginActivity.this,
+                                    "Sign in failed: " + task.getException().getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
 
         // Google sign-in button click

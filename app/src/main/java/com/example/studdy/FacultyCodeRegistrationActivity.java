@@ -1,10 +1,11 @@
 package com.example.studdy;
 
+import static SMTP.Credentials.SMTP_PASSWORD;
+
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.InputFilter;
 import android.text.InputType;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
@@ -14,20 +15,32 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
+
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
+    // SMTP credentials for Gmail
+    private static final String SMTP_EMAIL = "arshadali.app431@gmail.com"; // Your Gmail address
     private ImageView backArrow, passwordToggle;
-    private EditText usernameEditText, phoneEditText, passwordEditText;
+    private EditText usernameEditText, emailEditText, phoneEditText, passwordEditText;
     private RadioGroup roleRadioGroup;
     private AppCompatButton signUpButton, goToSignInButton;
     private boolean isPasswordVisible = false;
+    private FirebaseAuth auth;
     private FirebaseFirestore db;
 
     @Override
@@ -35,13 +48,14 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_faculty_code_registration);
 
-        // Initialize Firestore
+        // Initialize Firebase Auth and Firestore
+        auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
         // Initialize views
         backArrow = findViewById(R.id.backButton);
         roleRadioGroup = findViewById(R.id.roleRadioGroup);
-        usernameEditText = findViewById(R.id.usernameEditText);
+        emailEditText = findViewById(R.id.emailEditText);
         phoneEditText = findViewById(R.id.phoneEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         passwordToggle = findViewById(R.id.passwordToggle);
@@ -49,7 +63,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
         // Back arrow click
         backArrow.setOnClickListener(v -> {
-            finish(); // Go back to the previous activity (likely LoginActivity)
+            finish(); // go back to the previous (LoginActivity)
         });
 
         // Toggle password visibility
@@ -67,24 +81,39 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
             passwordEditText.setSelection(passwordEditText.getText().length());
         });
 
-        //phone number valid check
-        phoneEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(10)});
-        if (phoneEditText.length() != 10) {
-            phoneEditText.setError("Enter a valid 10-digit phone number");
-            return;
-        }
-
-
-
         // Sign up button click
         signUpButton.setOnClickListener(v -> {
             String username = usernameEditText.getText().toString().trim();
+            String email = emailEditText.getText().toString().trim();
             String phone = phoneEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
+
+
+            // Basic validation
+//            if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
+//                showErrorPopup("All fields are required!");
+//                return;
+//            }
 
             // Basic validation
             if (username.isEmpty()) {
                 usernameEditText.setError("Username is required");
+                return;
+            }
+
+            if (email.isEmpty()) {
+                emailEditText.setError("Email is required");
+                return;
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                emailEditText.setError("Enter a valid email address");
+                return;
+            }
+
+            // Restrict email to @paruluniversity.ac.in domain
+            if (!email.endsWith("@paruluniversity.ac.in")) {
+                emailEditText.setError("Only @paruluniversity.ac.in emails are allowed");
                 return;
             }
 
@@ -103,73 +132,58 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 return;
             }
 
-            // Check if username or phone number already exists in Firestore
-            checkFacultyExists(username, phone, () -> {
-                // If credentials are unique, proceed with registration
-                String staffCode = generateStaffCode(); // Generate a random staff code
-                saveFacultyToFirestore(username, phone, password, staffCode);
-            });
+            if (password.length() < 6) {
+                passwordEditText.setError("Password must be at least 6 characters");
+                return;
+            }
+
+            // Create user in Firebase Authentication
+            createUserInFirebaseAuth(email, password, username, phone);
         });
     }
 
-    // Method to check if username or phone number already exists in Firestore
-    private void checkFacultyExists(String username, String phone, Runnable onSuccess) {
-        db.collection("faculty")
-                .whereEqualTo("username", username)
-                .get()
-                .addOnCompleteListener(task -> {
+    // Method to create a user in Firebase Authentication
+    private void createUserInFirebaseAuth(String email, String password, String username, String phone) {
+        auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        QuerySnapshot usernameSnapshot = task.getResult();
-                        if (usernameSnapshot != null && !usernameSnapshot.isEmpty()) {
-                            usernameEditText.setError("Username already exists");
-                            return;
-                        }
-
-                        // Check phone number
-                        db.collection("faculty")
-                                .whereEqualTo("phone", phone)
-                                .get()
-                                .addOnCompleteListener(phoneTask -> {
-                                    if (phoneTask.isSuccessful()) {
-                                        QuerySnapshot phoneSnapshot = phoneTask.getResult();
-                                        if (phoneSnapshot != null && !phoneSnapshot.isEmpty()) {
-                                            phoneEditText.setError("Phone number already exists");
-                                        } else {
-                                            // If both username and phone are unique, proceed
-                                            onSuccess.run();
-                                        }
-                                    } else {
-                                        Toast.makeText(FacultyCodeRegistrationActivity.this,
-                                                "Error checking phone number: " + phoneTask.getException().getMessage(),
-                                                Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                        // User created successfully in Firebase Authentication
+                        String staffCode = generateStaffCode();
+                        saveFacultyToFirestore(email, username, phone, staffCode);
                     } else {
-                        Toast.makeText(FacultyCodeRegistrationActivity.this,
-                                "Error checking username: " + task.getException().getMessage(),
-                                Toast.LENGTH_SHORT).show();
+                        // Handle errors
+                        if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                            emailEditText.setError("Email already exists");
+                        } else {
+                            Toast.makeText(FacultyCodeRegistrationActivity.this,
+                                    "Registration failed: " + task.getException().getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
     }
 
     // Method to save faculty data to Firestore
-    private void saveFacultyToFirestore(String username, String phone, String password, String staffCode) {
+    private void saveFacultyToFirestore(String email, String username, String phone, String staffCode) {
         Map<String, Object> faculty = new HashMap<>();
+        faculty.put("email", email);
         faculty.put("username", username);
         faculty.put("phone", phone);
-        faculty.put("password", password); // Note: In a real app, password should be hashed
         faculty.put("staff_code", staffCode);
 
         db.collection("faculty")
-                .add(faculty)
+                .document(auth.getCurrentUser().getUid())
+                .set(faculty)
                 .addOnSuccessListener(documentReference -> {
-                    // Registration successful, send email (placeholder) and show popup
-                    sendStaffCodeEmail(username, staffCode); // Placeholder for email sending
-                    showSuccessPopup(staffCode);
+                    // Registration successful, send email and show popup
+                    new SendEmailTask(email, staffCode, () -> {
+                        // Show popup only after email is sent
+                        showSuccessPopup(staffCode);
+                    }).execute();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(FacultyCodeRegistrationActivity.this,
-                            "Registration failed: " + e.getMessage(),
+                            "Failed to save faculty data: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 });
     }
@@ -185,13 +199,6 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
         return code.toString();
     }
 
-    // Placeholder method for sending email
-    private void sendStaffCodeEmail(String username, String staffCode) {
-        // TODO: Implement actual email sending logic (e.g., using Firebase Functions, SendGrid, or JavaMail API)
-        // For now, this is a placeholder
-        System.out.println("Sending email to " + username + " with staff code: " + staffCode);
-    }
-
     // Method to show success popup and navigate to LoginActivity
     private void showSuccessPopup(String staffCode) {
         new AlertDialog.Builder(this)
@@ -204,5 +211,65 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 })
                 .setCancelable(false)
                 .show();
+    }
+
+    // AsyncTask to send email in the background
+    private class SendEmailTask extends AsyncTask<Void, Void, Boolean> {
+        private final String recipientEmail;
+        private final String staffCode;
+        private final Runnable onSuccess;
+        private String errorMessage;
+
+        public SendEmailTask(String recipientEmail, String staffCode, Runnable onSuccess) {
+            this.recipientEmail = recipientEmail;
+            this.staffCode = staffCode;
+            this.onSuccess = onSuccess;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                // Set up mail server properties
+                Properties props = new Properties();
+                props.put("mail.smtp.auth", "true");
+                props.put("mail.smtp.starttls.enable", "true");
+                props.put("mail.smtp.host", "smtp.gmail.com");
+                props.put("mail.smtp.port", "587");
+
+                // Create a session with authentication
+                Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(SMTP_EMAIL, SMTP_PASSWORD);
+                    }
+                });
+
+                // Create a new email message
+                Message message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(SMTP_EMAIL, "Studdy Team"));
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+                message.setSubject("Your Staff Code for Studdy");
+                message.setText("Dear Faculty,\n\nYour staff code is: " + staffCode + "\n\nPlease use this code to complete your registration.\n\nBest regards,\nStuddy Team");
+
+                // Send the email
+                Transport.send(message);
+                return true;
+            } catch (Exception e) {
+                errorMessage = e.getMessage();
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            if (success) {
+                Toast.makeText(FacultyCodeRegistrationActivity.this,
+                        "Email sent successfully", Toast.LENGTH_SHORT).show();
+                onSuccess.run(); // Call the success callback to show the popup
+            } else {
+                Toast.makeText(FacultyCodeRegistrationActivity.this,
+                        "Failed to send email: " + errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
