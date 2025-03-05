@@ -33,6 +33,11 @@
             android:name=".LoginActivity"
             android:exported="false" />
 
+        <!-- Faculty Code Registration Activity -->
+        <activity
+            android:name=".FacultyCodeRegistrationActivity"
+            android:exported="false" />
+
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"

@@ -8,7 +8,7 @@
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:id="@+id/dotsLayout"
@@ -23,10 +23,10 @@
         android:id="@+id/nextButton"
         android:layout_width="80sp"
         android:layout_height="80sp"
-        android:layout_centerVertical="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="80sp"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="80sp"
         android:background="@drawable/circle_button_background"
         android:text=">"
         android:textColor="#FFFFFF"

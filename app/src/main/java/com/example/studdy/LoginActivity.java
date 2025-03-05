@@ -3,7 +3,6 @@ package com.example.studdy;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
@@ -21,6 +20,7 @@ public class LoginActivity extends AppCompatActivity {
     private RadioGroup roleRadioGroup;
     private EditText usernameEditText, passwordEditText;
     private ImageView passwordToggle;
+
     private AppCompatButton signInButton;
     private SignInButton googleSignInButton;
     private TextView forgotPasswordTextView;
@@ -30,6 +30,14 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        // Add this with other view initializations
+        ImageView facultyRegistration1 = findViewById(R.id.facultyRegistration);
+        // Add this click listener
+        facultyRegistration1.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), FacultyCodeRegistrationActivity.class);
+            startActivity(intent);
+        });
 
         // Initialize views
         roleRadioGroup = findViewById(R.id.roleRadioGroup);
