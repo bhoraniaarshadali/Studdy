@@ -2,10 +2,14 @@ package com.example.studdy;
 
 import static SMTP.Credentials.SMTP_PASSWORD;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
@@ -21,11 +25,13 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Random;
 import java.util.regex.Pattern;
 
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -35,16 +41,16 @@ import javax.mail.internet.MimeMessage;
 public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
     private ImageView backArrow, passwordToggle;
-    private EditText emailEditText, phoneEditText, passwordEditText;
+    private EditText usernameEditText, emailEditText, phoneEditText, passwordEditText;
     private RadioGroup roleRadioGroup;
-    private AppCompatButton signUpButton;
+    private AppCompatButton signUpButton, goToSignInButton;
     private boolean isPasswordVisible = false;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+    private Dialog loadingDialog; // Custom loading dialog
 
     // SMTP credentials for Gmail
-    private static final String SMTP_EMAIL = "arshadali.app431@gmail.com"; // Your Gmail address
-    //private static final String SMTP_PASSWORD = "your-gmail-app-password"; // Replace with your Gmail App Password
+    private static final String SMTP_EMAIL = "arshadali.app431@gmail.com";
 
     // Regular expressions for validation
     private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9]{3,20}$"); // Alphanumeric, 3-20 characters
@@ -62,13 +68,28 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         // Initialize views
-        backArrow = findViewById(R.id.backButton);
+        backArrow = findViewById(R.id.backButton); // Corrected ID
         roleRadioGroup = findViewById(R.id.roleRadioGroup);
+        usernameEditText = findViewById(R.id.facultyUsernameEditText);
         emailEditText = findViewById(R.id.emailEditText);
         phoneEditText = findViewById(R.id.phoneEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         passwordToggle = findViewById(R.id.passwordToggle);
         signUpButton = findViewById(R.id.signUpButton);
+
+        // Initialize custom loading dialog
+        loadingDialog = new Dialog(this);
+        loadingDialog.setContentView(R.layout.loading_dialog);
+        loadingDialog.setCancelable(false); // Prevent dismissing by clicking outside
+        Objects.requireNonNull(loadingDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent); // Transparent background
+
+        // Get the ImageView for the loading animation
+        ImageView loadingImage = loadingDialog.findViewById(R.id.loadingImage);
+        if (loadingImage != null) {
+            // Load and apply the rotation animation
+            Animation rotation = AnimationUtils.loadAnimation(this, R.anim.rotate_loading);
+            loadingImage.startAnimation(rotation);
+        }
 
         // Back arrow click
         backArrow.setOnClickListener(v -> {
@@ -92,10 +113,16 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
         // Sign up button click
         signUpButton.setOnClickListener(v -> {
+            String username = usernameEditText.getText().toString().trim();
             String email = emailEditText.getText().toString().trim().toLowerCase(); // Normalize to lowercase
             String phone = phoneEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
 
+            // Username validation
+            if (username.isEmpty()) {
+                usernameEditText.setError("Username is required");
+                return;
+            }
             // Email validation
             if (email.isEmpty()) {
                 emailEditText.setError("Email is required");
@@ -130,20 +157,26 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 return;
             }
 
+            // Show loading dialog
+            loadingDialog.show();
+
             // Create user in Firebase Authentication
-            createUserInFirebaseAuth(email, password, phone);
+            createUserInFirebaseAuth(email, password, username, phone);
         });
     }
 
     // Method to create a user in Firebase Authentication
-    private void createUserInFirebaseAuth(String email, String password, String phone) {
+    private void createUserInFirebaseAuth(String email, String password, String username, String phone) {
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         // User created successfully in Firebase Authentication
                         String staffCode = generateStaffCode();
-                        saveFacultyToFirestore(email, phone, staffCode);
+                        saveFacultyToFirestore(email, username, phone, staffCode);
                     } else {
+                        // Hide loading dialog on failure
+                        loadingDialog.dismiss();
+
                         // Handle errors
                         if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                             emailEditText.setError("Email already exists");
@@ -157,11 +190,10 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
     }
 
     // Method to save faculty data to Firestore
-    private void saveFacultyToFirestore(String email, //String username,
-                                         String phone, String staffCode) {
+    private void saveFacultyToFirestore(String email, String username, String phone, String staffCode) {
         Map<String, Object> faculty = new HashMap<>();
         faculty.put("email", email);
-        //faculty.put("username", username);
+        faculty.put("username", username);
         faculty.put("phone", phone); // Correctly map phone number
         faculty.put("staff_code", staffCode); // Correctly map staff code
 
@@ -171,11 +203,15 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 .addOnSuccessListener(documentReference -> {
                     // Registration successful, send email and show popup
                     new SendEmailTask(email, staffCode, () -> {
+                        // Hide loading dialog after email is sent
+                        loadingDialog.dismiss();
                         // Show popup only after email is sent
                         showSuccessPopup(staffCode);
                     }).execute();
                 })
                 .addOnFailureListener(e -> {
+                    // Hide loading dialog on failure
+                    loadingDialog.dismiss();
                     Toast.makeText(FacultyCodeRegistrationActivity.this,
                             "Failed to save faculty data: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
@@ -245,8 +281,10 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
             if (success) {
                 Toast.makeText(FacultyCodeRegistrationActivity.this,
                         "Email sent successfully", Toast.LENGTH_SHORT).show();
-                onSuccess.run(); // Call the success callback to show the popup
+                onSuccess.run(); // Call the success callback
             } else {
+                // Hide loading dialog on failure
+                loadingDialog.dismiss();
                 Toast.makeText(FacultyCodeRegistrationActivity.this,
                         "Failed to send email: " + errorMessage, Toast.LENGTH_SHORT).show();
             }
