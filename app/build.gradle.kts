@@ -25,7 +25,8 @@ android {
                 "proguard-rules.pro"
             )
         }
-    }// Add this block to handle duplicate META-INF files
+    }
+
     packaging {
         resources {
             excludes += ("/META-INF/NOTICE.md")
@@ -39,7 +40,6 @@ android {
 }
 
 dependencies {
-
     // JavaMail for sending emails via SMTP
     implementation(libs.android.mail)
     implementation(libs.android.activation)
@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.constraintlayout)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

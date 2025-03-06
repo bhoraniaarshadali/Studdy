@@ -1,10 +1,10 @@
 package com.example.studdy;
 
+import static SMTP.Credentials.SMTP_EMAIL;
 import static SMTP.Credentials.SMTP_PASSWORD;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.View;
@@ -28,6 +28,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.mail.Message;
@@ -43,20 +46,17 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
     private ImageView backArrow, passwordToggle;
     private EditText usernameEditText, emailEditText, phoneEditText, passwordEditText;
     private RadioGroup roleRadioGroup;
-    private AppCompatButton signUpButton, goToSignInButton;
+    private AppCompatButton signUpButton;
     private boolean isPasswordVisible = false;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private Dialog loadingDialog; // Custom loading dialog
+    private ExecutorService emailExecutor; // Executor for email sending
 
-    // SMTP credentials for Gmail
-    private static final String SMTP_EMAIL = "arshadali.app431@gmail.com";
-
-    // Regular expressions for validation
+    // Precompiled regular expressions for validation
     private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9]{3,20}$"); // Alphanumeric, 3-20 characters
     private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9]{10}$"); // Exactly 10 digits
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$");
-    // Password must contain: at least one lowercase, one uppercase, one digit, one special character, minimum 6 characters
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +67,11 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        // Initialize Executor for email sending
+        emailExecutor = Executors.newSingleThreadExecutor();
+
         // Initialize views
-        backArrow = findViewById(R.id.backButton); // Corrected ID
+        backArrow = findViewById(R.id.backButton);
         roleRadioGroup = findViewById(R.id.roleRadioGroup);
         usernameEditText = findViewById(R.id.facultyUsernameEditText);
         emailEditText = findViewById(R.id.emailEditText);
@@ -104,7 +107,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 isPasswordVisible = false;
             } else {
                 passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                passwordToggle.setImageResource(R.drawable.ic_eye); // Open eye (update if you have a different icon)
+                passwordToggle.setImageResource(R.drawable.ic_eye); // Open eye
                 isPasswordVisible = true;
             }
             // Move cursor to the end of the text
@@ -118,61 +121,76 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
             String phone = phoneEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
 
-            // Username validation
-            if (username.isEmpty()) {
-                usernameEditText.setError("Username is required");
-                return;
-            }
-            // Email validation
-            if (email.isEmpty()) {
-                emailEditText.setError("Email is required");
-                return;
-            }
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                emailEditText.setError("Enter a valid email address");
-                return;
-            }
-            if (!email.endsWith("@paruluniversity.ac.in")) {
-                emailEditText.setError("Only @paruluniversity.ac.in emails are allowed");
-                return;
-            }
-
-            // Phone number validation
-            if (phone.isEmpty()) {
-                phoneEditText.setError("Phone number is required");
-                return;
-            }
-            if (!PHONE_PATTERN.matcher(phone).matches()) {
-                phoneEditText.setError("Phone number must be exactly 10 digits");
-                return;
-            }
-
-            // Password validation
-            if (password.isEmpty()) {
-                passwordEditText.setError("Password is required");
-                return;
-            }
-            if (!PASSWORD_PATTERN.matcher(password).matches()) {
-                passwordEditText.setError("Password must be at least 6 characters and contain at least one uppercase letter, one lowercase letter, one digit, and one special character (@$!%*?&)");
+            // Validate inputs
+            if (!validateInputs(username, email, phone, password)) {
                 return;
             }
 
             // Show loading dialog
             loadingDialog.show();
 
-            // Create user in Firebase Authentication
-            createUserInFirebaseAuth(email, password, username, phone);
+            // Start the registration process
+            registerUser(email, password, username, phone);
         });
     }
 
-    // Method to create a user in Firebase Authentication
-    private void createUserInFirebaseAuth(String email, String password, String username, String phone) {
+    // Separate method for input validation
+    private boolean validateInputs(String username, String email, String phone, String password) {
+        // Username validation
+        if (username.isEmpty()) {
+            usernameEditText.setError("Username is required");
+            return false;
+        }
+        if (!USERNAME_PATTERN.matcher(username).matches()) {
+            usernameEditText.setError("Username must be 3-20 characters long and contain only letters and numbers");
+            return false;
+        }
+
+        // Email validation
+        if (email.isEmpty()) {
+            emailEditText.setError("Email is required");
+            return false;
+        }
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailEditText.setError("Enter a valid email address");
+            return false;
+        }
+        if (!email.endsWith("@paruluniversity.ac.in")) {
+            emailEditText.setError("Only @paruluniversity.ac.in emails are allowed");
+            return false;
+        }
+
+        // Phone number validation
+        if (phone.isEmpty()) {
+            phoneEditText.setError("Phone number is required");
+            return false;
+        }
+        if (!PHONE_PATTERN.matcher(phone).matches()) {
+            phoneEditText.setError("Phone number must be exactly 10 digits");
+            return false;
+        }
+
+        // Password validation
+        if (password.isEmpty()) {
+            passwordEditText.setError("Password is required");
+            return false;
+        }
+        if (!PASSWORD_PATTERN.matcher(password).matches()) {
+            passwordEditText.setError("Password must be at least 6 characters and contain at least one uppercase letter, one lowercase letter, one digit, and one special character (@$!%*?&)");
+            return false;
+        }
+
+        return true;
+    }
+
+    // Separate method for Firebase Authentication
+    private void registerUser(String email, String password, String username, String phone) {
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         // User created successfully in Firebase Authentication
                         String staffCode = generateStaffCode();
-                        saveFacultyToFirestore(email, username, phone, staffCode);
+                        saveToFirestore(email, username, phone, staffCode);
                     } else {
                         // Hide loading dialog on failure
                         loadingDialog.dismiss();
@@ -189,28 +207,21 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 });
     }
 
-    // Method to save faculty data to Firestore
-    private void saveFacultyToFirestore(String email, String username, String phone, String staffCode) {
+    // Separate method for saving to Firestore
+    private void saveToFirestore(String email, String username, String phone, String staffCode) {
         Map<String, Object> faculty = new HashMap<>();
         faculty.put("email", email);
         faculty.put("username", username);
-        faculty.put("phone", phone); // Correctly map phone number
-        faculty.put("staff_code", staffCode); // Correctly map staff code
+        faculty.put("phone", phone);
+        faculty.put("staff_code", staffCode);
 
         db.collection("faculty")
                 .document(auth.getCurrentUser().getUid())
                 .set(faculty)
                 .addOnSuccessListener(documentReference -> {
-                    // Registration successful, send email and show popup
-                    new SendEmailTask(email, staffCode, () -> {
-                        // Hide loading dialog after email is sent
-                        loadingDialog.dismiss();
-                        // Show popup only after email is sent
-                        showSuccessPopup(staffCode);
-                    }).execute();
+                    sendStaffCodeEmail(email, staffCode);
                 })
                 .addOnFailureListener(e -> {
-                    // Hide loading dialog on failure
                     loadingDialog.dismiss();
                     Toast.makeText(FacultyCodeRegistrationActivity.this,
                             "Failed to save faculty data: " + e.getMessage(),
@@ -218,7 +229,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 });
     }
 
-    // Method to generate a random staff code
+    // Separate method for generating staff code
     private String generateStaffCode() {
         Random random = new Random();
         StringBuilder code = new StringBuilder();
@@ -229,21 +240,9 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
         return code.toString();
     }
 
-    // AsyncTask to send email in the background
-    private class SendEmailTask extends AsyncTask<Void, Void, Boolean> {
-        private final String recipientEmail;
-        private final String staffCode;
-        private final Runnable onSuccess;
-        private String errorMessage;
-
-        public SendEmailTask(String recipientEmail, String staffCode, Runnable onSuccess) {
-            this.recipientEmail = recipientEmail;
-            this.staffCode = staffCode;
-            this.onSuccess = onSuccess;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
+    // Separate method for sending email using ExecutorService
+    private void sendStaffCodeEmail(String recipientEmail, String staffCode) {
+        emailExecutor.submit(() -> {
             try {
                 // Set up mail server properties
                 Properties props = new Properties();
@@ -251,6 +250,8 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 props.put("mail.smtp.starttls.enable", "true");
                 props.put("mail.smtp.host", "smtp.gmail.com");
                 props.put("mail.smtp.port", "587");
+                props.put("mail.smtp.connectiontimeout", "10000"); // 10 seconds timeout
+                props.put("mail.smtp.timeout", "10000"); // 10 seconds timeout
 
                 // Create a session with authentication
                 Session session = Session.getInstance(props, new javax.mail.Authenticator() {
@@ -269,26 +270,25 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
                 // Send the email
                 Transport.send(message);
-                return true;
-            } catch (Exception e) {
-                errorMessage = e.getMessage();
-                return false;
-            }
-        }
 
-        @Override
-        protected void onPostExecute(Boolean success) {
-            if (success) {
-                Toast.makeText(FacultyCodeRegistrationActivity.this,
-                        "Email sent successfully", Toast.LENGTH_SHORT).show();
-                onSuccess.run(); // Call the success callback
-            } else {
-                // Hide loading dialog on failure
-                loadingDialog.dismiss();
-                Toast.makeText(FacultyCodeRegistrationActivity.this,
-                        "Failed to send email: " + errorMessage, Toast.LENGTH_SHORT).show();
+                // Run on UI thread to update UI
+                runOnUiThread(() -> {
+                    loadingDialog.dismiss();
+                    Toast.makeText(FacultyCodeRegistrationActivity.this,
+                            "Email sent successfully", Toast.LENGTH_LONG).show();
+                    Intent gotoMainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(gotoMainActivity);
+                    finish();
+                });
+            } catch (Exception e) {
+                // Run on UI thread to update UI
+                runOnUiThread(() -> {
+                    loadingDialog.dismiss();
+                    Toast.makeText(FacultyCodeRegistrationActivity.this,
+                            "Failed to send email: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
             }
-        }
+        });
     }
 
     // Method to show success popup and navigate to LoginActivity
@@ -303,5 +303,19 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 })
                 .setCancelable(false)
                 .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Shutdown the executor to prevent memory leaks
+        emailExecutor.shutdown();
+        try {
+            if (!emailExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                emailExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            emailExecutor.shutdownNow();
+        }
     }
 }
