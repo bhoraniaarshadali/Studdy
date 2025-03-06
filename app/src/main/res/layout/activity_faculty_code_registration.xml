@@ -29,7 +29,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/rounded_background"
-        android:padding="16dp">
+        android:scrollbars="none"
+        android:padding="15dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -57,7 +58,7 @@
                 android:fontFamily="@font/poppins_regular"
                 android:text="Role *"
                 android:textColor="#000000"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <RadioGroup
                 android:id="@+id/roleRadioGroup"
@@ -85,7 +86,7 @@
                 android:fontFamily="@font/poppins_regular"
                 android:text="Username *"
                 android:textColor="#000000"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -109,7 +110,7 @@
                     android:layout_weight="1"
                     android:background="@null"
                     android:fontFamily="@font/poppins_regular"
-                    android:textSize="17sp"
+                    android:textSize="16sp"
                     android:hint="enter username"
                     android:inputType="textPersonName"
                     android:singleLine="true" />
@@ -122,7 +123,7 @@
                 android:fontFamily="@font/poppins_regular"
                 android:text="Email *"
                 android:textColor="#000000"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -146,7 +147,7 @@
                     android:layout_weight="1"
                     android:background="@null"
                     android:fontFamily="@font/poppins_regular"
-                    android:textSize="17sp"
+                    android:textSize="16sp"
                     android:hint="enter email address"
                     android:inputType="textEmailAddress"
                     android:singleLine="true" />
@@ -159,7 +160,7 @@
                 android:fontFamily="@font/poppins_regular"
                 android:text="Phone No *"
                 android:textColor="#000000"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -183,7 +184,7 @@
                     android:layout_weight="1"
                     android:background="@null"
                     android:fontFamily="@font/poppins_regular"
-                    android:textSize="17sp"
+                    android:textSize="16sp"
                     android:hint="enter phone no"
                     android:inputType="number"
                     android:maxLength="10"
@@ -198,7 +199,7 @@
                 android:fontFamily="@font/poppins_regular"
                 android:text="Password *"
                 android:textColor="#000000"
-                android:textSize="16sp" />
+                android:textSize="15sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -222,7 +223,7 @@
                     android:layout_weight="1"
                     android:background="@null"
                     android:fontFamily="@font/poppins_regular"
-                    android:textSize="17sp"
+                    android:textSize="16sp"
                     android:hint="enter password"
                     android:inputType="textPassword"
                     android:singleLine="true" />
