@@ -1,10 +1,11 @@
 package com.example.studdy;
 
+import static SMTP.Credentials.SMTP_PASSWORD;
+
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
@@ -22,9 +23,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -34,7 +35,7 @@ import javax.mail.internet.MimeMessage;
 public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
     private ImageView backArrow, passwordToggle;
-    private EditText usernameEditText, emailEditText, phoneEditText, passwordEditText;
+    private EditText emailEditText, phoneEditText, passwordEditText;
     private RadioGroup roleRadioGroup;
     private AppCompatButton signUpButton;
     private boolean isPasswordVisible = false;
@@ -43,7 +44,13 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
     // SMTP credentials for Gmail
     private static final String SMTP_EMAIL = "arshadali.app431@gmail.com"; // Your Gmail address
-    private static final String SMTP_PASSWORD = "your-gmail-app-password"; // Replace with your Gmail App Password
+    //private static final String SMTP_PASSWORD = "your-gmail-app-password"; // Replace with your Gmail App Password
+
+    // Regular expressions for validation
+    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9]{3,20}$"); // Alphanumeric, 3-20 characters
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9]{10}$"); // Exactly 10 digits
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$");
+    // Password must contain: at least one lowercase, one uppercase, one digit, one special character, minimum 6 characters
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,66 +92,57 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
         // Sign up button click
         signUpButton.setOnClickListener(v -> {
-            String username = usernameEditText.getText().toString().trim();
-            String email = emailEditText.getText().toString().trim();
+            String email = emailEditText.getText().toString().trim().toLowerCase(); // Normalize to lowercase
             String phone = phoneEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
 
-            // Basic validation
-            if (username.isEmpty()) {
-                usernameEditText.setError("Username is required");
-                return;
-            }
-
+            // Email validation
             if (email.isEmpty()) {
                 emailEditText.setError("Email is required");
                 return;
             }
-
             if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 emailEditText.setError("Enter a valid email address");
                 return;
             }
-
-            // Restrict email to @paruluniversity.ac.in domain
             if (!email.endsWith("@paruluniversity.ac.in")) {
                 emailEditText.setError("Only @paruluniversity.ac.in emails are allowed");
                 return;
             }
 
+            // Phone number validation
             if (phone.isEmpty()) {
                 phoneEditText.setError("Phone number is required");
                 return;
             }
-
-            if (phone.length() < 10) {
-                phoneEditText.setError("Phone number must be at least 10 digits");
+            if (!PHONE_PATTERN.matcher(phone).matches()) {
+                phoneEditText.setError("Phone number must be exactly 10 digits");
                 return;
             }
 
+            // Password validation
             if (password.isEmpty()) {
                 passwordEditText.setError("Password is required");
                 return;
             }
-
-            if (password.length() < 6) {
-                passwordEditText.setError("Password must be at least 6 characters");
+            if (!PASSWORD_PATTERN.matcher(password).matches()) {
+                passwordEditText.setError("Password must be at least 6 characters and contain at least one uppercase letter, one lowercase letter, one digit, and one special character (@$!%*?&)");
                 return;
             }
 
             // Create user in Firebase Authentication
-            createUserInFirebaseAuth(email, password, username, phone);
+            createUserInFirebaseAuth(email, password, phone);
         });
     }
 
     // Method to create a user in Firebase Authentication
-    private void createUserInFirebaseAuth(String email, String password, String username, String phone) {
+    private void createUserInFirebaseAuth(String email, String password, String phone) {
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         // User created successfully in Firebase Authentication
                         String staffCode = generateStaffCode();
-                        saveFacultyToFirestore(email, username, phone, staffCode);
+                        saveFacultyToFirestore(email, phone, staffCode);
                     } else {
                         // Handle errors
                         if (task.getException() instanceof FirebaseAuthUserCollisionException) {
@@ -159,12 +157,13 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
     }
 
     // Method to save faculty data to Firestore
-    private void saveFacultyToFirestore(String email, String username, String phone, String staffCode) {
+    private void saveFacultyToFirestore(String email, //String username,
+                                         String phone, String staffCode) {
         Map<String, Object> faculty = new HashMap<>();
         faculty.put("email", email);
-        faculty.put("username", username);
-        faculty.put("phone", phone);
-        faculty.put("staff_code", staffCode);
+        //faculty.put("username", username);
+        faculty.put("phone", phone); // Correctly map phone number
+        faculty.put("staff_code", staffCode); // Correctly map staff code
 
         db.collection("faculty")
                 .document(auth.getCurrentUser().getUid())
