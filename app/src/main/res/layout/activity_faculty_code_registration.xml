@@ -256,7 +256,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/poppins_regular"
-                    android:text="Generate staff code sent on your email or open your inbox and staff code FW6902"
+                    android:text="Generate staff code sent on your email or open your inbox and staff code (e.g. FW6902)"
                     android:textColor="#000000"
                     android:textSize="12sp" />
             </LinearLayout>

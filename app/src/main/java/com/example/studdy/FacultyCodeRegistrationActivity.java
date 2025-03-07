@@ -96,7 +96,9 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
         // Back arrow click
         backArrow.setOnClickListener(v -> {
-            finish(); // Go back to the previous activity (likely LoginActivity)
+            Intent back = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(back);
+            //finish();
         });
 
         // Toggle password visibility
@@ -141,11 +143,6 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
             usernameEditText.setError("Username is required");
             return false;
         }
-        if (!USERNAME_PATTERN.matcher(username).matches()) {
-            usernameEditText.setError("Username must be 3-20 characters long and contain only letters and numbers");
-            return false;
-        }
-
         // Email validation
         if (email.isEmpty()) {
             emailEditText.setError("Email is required");
@@ -276,8 +273,8 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                     loadingDialog.dismiss();
                     Toast.makeText(FacultyCodeRegistrationActivity.this,
                             "Email sent successfully", Toast.LENGTH_LONG).show();
-                    Intent gotoMainActivity = new Intent(getApplicationContext(), MainActivity.class);
-                    startActivity(gotoMainActivity);
+                    Intent gotoLogin = new Intent(getApplicationContext(), LoginActivity.class);
+                    startActivity(gotoLogin);
                     finish();
                 });
             } catch (Exception e) {

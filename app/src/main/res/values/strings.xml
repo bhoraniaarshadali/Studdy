@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Studdy Exam-Portal-App</string>
+    <string name="default_web_client_id">771072886988</string>
+
 </resources>
