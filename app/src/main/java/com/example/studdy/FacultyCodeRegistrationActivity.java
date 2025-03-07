@@ -7,7 +7,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
@@ -34,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -43,6 +41,10 @@ import javax.mail.internet.MimeMessage;
 
 public class FacultyCodeRegistrationActivity extends AppCompatActivity {
 
+    // Precompiled regular expressions for validation
+    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9]{3,20}$"); // Alphanumeric, 3-20 characters
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9]{10}$"); // Exactly 10 digits
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$");
     private ImageView backArrow, passwordToggle;
     private EditText usernameEditText, emailEditText, phoneEditText, passwordEditText;
     private RadioGroup roleRadioGroup;
@@ -52,11 +54,6 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private Dialog loadingDialog; // Custom loading dialog
     private ExecutorService emailExecutor; // Executor for email sending
-
-    // Precompiled regular expressions for validation
-    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9]{3,20}$"); // Alphanumeric, 3-20 characters
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9]{10}$"); // Exactly 10 digits
-    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -233,6 +230,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         for (int i = 0; i < 6; i++) {
             code.append(characters.charAt(random.nextInt(characters.length())));
+            //System.out.println(code);
         }
         return code.toString();
     }

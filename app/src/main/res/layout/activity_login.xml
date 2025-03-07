@@ -33,7 +33,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20sp">
+            android:padding="20sp"
+            android:scrollbars="none">
 
             <!-- Sign in title -->
             <TextView
@@ -69,6 +70,7 @@
                     android:fontFamily="@font/poppins_regular"
                     android:text="Student"
                     android:textColor="#000000" />
+
                 <RadioButton
                     android:id="@+id/facultyRadioButton"
                     android:layout_width="wrap_content"
@@ -111,9 +113,9 @@
                     android:background="@null"
                     android:fontFamily="@font/poppins_regular"
                     android:hint="enter university email / staff code"
-                    android:textSize="16sp"
                     android:inputType="text"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:textSize="16sp" />
             </LinearLayout>
 
             <!-- Password field -->

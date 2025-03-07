@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="75sp"
     android:layout_height="75sp"
-    android:orientation="vertical"
     android:background="@drawable/bg_loader"
-    android:gravity="center">
+    android:gravity="center"
+    android:orientation="vertical">
 
     <ImageView
         android:id="@+id/loadingImage"
