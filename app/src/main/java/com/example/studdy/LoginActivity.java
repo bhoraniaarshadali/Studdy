@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -120,7 +119,7 @@ public class LoginActivity extends AppCompatActivity {
                     .setTitle("Select Role")
                     .setItems(new String[]{"Faculty", "Student"}, (dialog, which) -> {
                         if (which == 0) {
-                            startActivity(new Intent(LoginActivity.this, FacultyCodeRegistrationActivity.class));
+                            startActivity(new Intent(LoginActivity.this, FacultyRegistrationActivity.class));
                         } else {
                             startActivity(new Intent(LoginActivity.this, StudentRegistrationActivity.class));
                         }
@@ -246,7 +245,7 @@ public class LoginActivity extends AppCompatActivity {
                 return false;
             }
             if (!STAFF_CODE_PATTERN.matcher(input).matches()) {
-                usernameEditText.setError("Staff code must be uppercase and more than 6 characters");
+                usernameEditText.setError("Staff code must be uppercase and max 6 characters");
                 return false;
             }
         } else {
@@ -306,7 +305,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         // Update Firestore password if the role is "Student"
                         if (role.equals("Student")) {
-                            updatePasswordInFirestore(email, password);
+                            //updatePasswordInFirestore(email, password);
                         }
                     } else {
                         loadingDialog.dismiss();
@@ -316,25 +315,6 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
-
-    // Function to update password in Firestore
-    private void updatePasswordInFirestore(String email, String newPassword) {
-        db.collection("students")
-                .whereEqualTo("email", email)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                        String documentId = task.getResult().getDocuments().get(0).getId();
-                        db.collection("students").document(documentId)
-                                .update("password", newPassword)
-                                .addOnSuccessListener(aVoid ->
-                                        Toast.makeText(LoginActivity.this, "Password updated in Firestore", Toast.LENGTH_SHORT).show())
-                                .addOnFailureListener(e ->
-                                        Toast.makeText(LoginActivity.this, "Failed to update password in Firestore", Toast.LENGTH_SHORT).show());
-                    }
-                });
-    }
-
 
     private void validateUserRoleFromFirestore(String role, String email) {
         String collection = role.equals("Faculty") ? "faculty" : "students";
