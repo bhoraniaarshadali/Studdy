@@ -120,7 +120,7 @@ public class LoginActivity extends AppCompatActivity {
                         if (which == 0) {
                             startActivity(new Intent(LoginActivity.this, FacultyCodeRegistrationActivity.class));
                         } else {
-                            startActivity(new Intent(LoginActivity.this, LoginActivity.class));
+                            startActivity(new Intent(LoginActivity.this, StudentRegistrationActivity.class));
                         }
                     })
                     .setNegativeButton("Cancel", null)
@@ -167,24 +167,38 @@ public class LoginActivity extends AppCompatActivity {
             startActivityForResult(signInIntent, 100);
         });
 
-        // Forgot password click
         forgotPasswordTextView.setOnClickListener(v -> {
             String email = usernameEditText.getText().toString().trim();
+
             if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 usernameEditText.setError("Enter a valid email address");
                 return;
             }
-            loadingDialog.show();
-            auth.sendPasswordResetEmail(email)
+
+            // Check if the email belongs to a faculty member
+            db.collection("faculty")
+                    .whereEqualTo("email", email)
+                    .get()
                     .addOnCompleteListener(task -> {
-                        loadingDialog.dismiss();
-                        if (task.isSuccessful()) {
-                            Toast.makeText(LoginActivity.this, "Password reset email sent", Toast.LENGTH_SHORT).show();
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            // Faculty found, restrict reset
+                            Toast.makeText(LoginActivity.this, "Faculty must contact the admin for password reset", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(LoginActivity.this, "Failed to send reset email: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            // Email is not in faculty collection, allow password reset
+                            loadingDialog.show();
+                            auth.sendPasswordResetEmail(email)
+                                    .addOnCompleteListener(task1 -> {
+                                        loadingDialog.dismiss();
+                                        if (task1.isSuccessful()) {
+                                            Toast.makeText(LoginActivity.this, "Password reset email sent", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(LoginActivity.this, "Failed to send reset email: " + task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                         }
                     });
         });
+
     }
 
     @Override
@@ -280,6 +294,11 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         validateUserRoleFromFirestore(role, email);
+
+                        // Update Firestore password if the role is "Student"
+                        if (role.equals("Student")) {
+                            updatePasswordInFirestore(email, password);
+                        }
                     } else {
                         loadingDialog.dismiss();
                         Toast.makeText(LoginActivity.this,
@@ -288,6 +307,25 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    // Function to update password in Firestore
+    private void updatePasswordInFirestore(String email, String newPassword) {
+        db.collection("students")
+                .whereEqualTo("email", email)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        String documentId = task.getResult().getDocuments().get(0).getId();
+                        db.collection("students").document(documentId)
+                                .update("password", newPassword)
+                                .addOnSuccessListener(aVoid ->
+                                        Toast.makeText(LoginActivity.this, "Password updated in Firestore", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(LoginActivity.this, "Failed to update password in Firestore", Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
+
 
     private void validateUserRoleFromFirestore(String role, String email) {
         String collection = role.equals("Faculty") ? "faculty" : "students";
