@@ -184,7 +184,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         // User created successfully in Firebase Authentication
                         String staffCode = generateStaffCode();
-                        saveToFirestore(email, username, phone, staffCode, password);
+                        saveToFirestore(email, username, phone, staffCode);
                     } else {
                         // Hide loading dialog on failure
                         loadingDialog.dismiss();
@@ -202,13 +202,12 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
     }
 
     // Separate method for saving to Firestore
-    private void saveToFirestore(String email, String username, String phone, String staffCode, String password) {
+    private void saveToFirestore(String email, String username, String phone, String staffCode) {
         Map<String, Object> faculty = new HashMap<>();
         faculty.put("email", email);
         faculty.put("username", username);
         faculty.put("phone", phone);
         faculty.put("staff_code", staffCode);
-        faculty.put("password", password);
 
         db.collection("faculty")
                 .document(auth.getCurrentUser().getUid())
