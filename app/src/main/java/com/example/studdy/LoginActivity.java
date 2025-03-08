@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
@@ -118,9 +119,9 @@ public class LoginActivity extends AppCompatActivity {
                     .setTitle("Select Role")
                     .setItems(new String[]{"Faculty", "Student"}, (dialog, which) -> {
                         if (which == 0) {
-                            startActivity(new Intent(LoginActivity.this, FacultyCodeRegistrationActivity.class));
+                            startActivity(new Intent(LoginActivity.this, FacultyRegistrationActivity.class));
                         } else {
-                            startActivity(new Intent(LoginActivity.this, LoginActivity.class));
+                            startActivity(new Intent(LoginActivity.this, StudentRegistrationActivity.class));
                         }
                     })
                     .setNegativeButton("Cancel", null)
@@ -167,24 +168,45 @@ public class LoginActivity extends AppCompatActivity {
             startActivityForResult(signInIntent, 100);
         });
 
-        // Forgot password click
-        forgotPasswordTextView.setOnClickListener(v -> {
-            String email = usernameEditText.getText().toString().trim();
-            if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                usernameEditText.setError("Enter a valid email address");
-                return;
+        forgotPasswordTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(LoginActivity.this, "Forgot Password Clicked", Toast.LENGTH_SHORT).show();
             }
-            loadingDialog.show();
-            auth.sendPasswordResetEmail(email)
-                    .addOnCompleteListener(task -> {
-                        loadingDialog.dismiss();
-                        if (task.isSuccessful()) {
-                            Toast.makeText(LoginActivity.this, "Password reset email sent", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(LoginActivity.this, "Failed to send reset email: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
         });
+
+//        forgotPasswordTextView.setOnClickListener(v -> {
+//            String email = usernameEditText.getText().toString().trim();
+//
+//            if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+//                usernameEditText.setError("Enter a valid email address");
+//                return;
+//            }
+//
+//            // Check if the email belongs to a faculty member
+//            db.collection("faculty")
+//                    .whereEqualTo("email", email)
+//                    .get()
+//                    .addOnCompleteListener(task -> {
+//                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+//                            // Faculty found, restrict reset
+//                            Toast.makeText(LoginActivity.this, "Faculty must contact the admin for password reset", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            // Email is not in faculty collection, allow password reset
+//                            loadingDialog.show();
+//                            auth.sendPasswordResetEmail(email)
+//                                    .addOnCompleteListener(task1 -> {
+//                                        loadingDialog.dismiss();
+//                                        if (task1.isSuccessful()) {
+//                                            Toast.makeText(LoginActivity.this, "Password reset email sent", Toast.LENGTH_SHORT).show();
+//                                        } else {
+//                                            Toast.makeText(LoginActivity.this, "Failed to send reset email: " + task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
+//                                        }
+//                                    });
+//                        }
+//                    });
+//        });
+
     }
 
     @Override
@@ -223,7 +245,7 @@ public class LoginActivity extends AppCompatActivity {
                 return false;
             }
             if (!STAFF_CODE_PATTERN.matcher(input).matches()) {
-                usernameEditText.setError("Staff code must be uppercase and more than 6 characters");
+                usernameEditText.setError("Staff code must be uppercase and max 6 characters");
                 return false;
             }
         } else {
@@ -280,6 +302,11 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         validateUserRoleFromFirestore(role, email);
+
+                        // Update Firestore password if the role is "Student"
+                        if (role.equals("Student")) {
+                            //updatePasswordInFirestore(email, password);
+                        }
                     } else {
                         loadingDialog.dismiss();
                         Toast.makeText(LoginActivity.this,

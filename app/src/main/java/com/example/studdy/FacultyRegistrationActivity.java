@@ -39,7 +39,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-public class FacultyCodeRegistrationActivity extends AppCompatActivity {
+public class FacultyRegistrationActivity extends AppCompatActivity {
 
     // Precompiled regular expressions for validation
     private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9]{3,20}$"); // Alphanumeric, 3-20 characters
@@ -193,7 +193,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                         if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                             emailEditText.setError("Email already exists");
                         } else {
-                            Toast.makeText(FacultyCodeRegistrationActivity.this,
+                            Toast.makeText(FacultyRegistrationActivity.this,
                                     "Registration failed: " + task.getException().getMessage(),
                                     Toast.LENGTH_SHORT).show();
                         }
@@ -217,7 +217,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     loadingDialog.dismiss();
-                    Toast.makeText(FacultyCodeRegistrationActivity.this,
+                    Toast.makeText(FacultyRegistrationActivity.this,
                             "Failed to save faculty data: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 });
@@ -269,7 +269,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 // Run on UI thread to update UI
                 runOnUiThread(() -> {
                     loadingDialog.dismiss();
-                    Toast.makeText(FacultyCodeRegistrationActivity.this,
+                    Toast.makeText(FacultyRegistrationActivity.this,
                             "Email sent successfully", Toast.LENGTH_LONG).show();
                     Intent gotoLogin = new Intent(getApplicationContext(), LoginActivity.class);
                     startActivity(gotoLogin);
@@ -279,7 +279,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 // Run on UI thread to update UI
                 runOnUiThread(() -> {
                     loadingDialog.dismiss();
-                    Toast.makeText(FacultyCodeRegistrationActivity.this,
+                    Toast.makeText(FacultyRegistrationActivity.this,
                             "Failed to send email: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
             }
@@ -293,7 +293,7 @@ public class FacultyCodeRegistrationActivity extends AppCompatActivity {
                 .setMessage("Generated staff code sent on your email")
                 .setPositiveButton("OK", (dialog, which) -> {
                     // Navigate to LoginActivity
-                    startActivity(new Intent(FacultyCodeRegistrationActivity.this, LoginActivity.class));
+                    startActivity(new Intent(FacultyRegistrationActivity.this, LoginActivity.class));
                     finish();
                 })
                 .setCancelable(false)
