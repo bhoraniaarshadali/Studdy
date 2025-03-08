@@ -165,7 +165,7 @@ public class StudentRegistrationActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "Firebase Authentication successful for email: " + email);
                         // User created successfully in Firebase Authentication
-                        saveToFirestore(email, username, phone, password);
+                        saveToFirestore(email, username, phone);
                     } else {
                         // Hide loading dialog on failure
                         loadingDialog.dismiss();
@@ -184,12 +184,11 @@ public class StudentRegistrationActivity extends AppCompatActivity {
                 });
     }
 
-    private void saveToFirestore(String email, String username, String phone, String password) {
+    private void saveToFirestore(String email, String username, String phone) {
         Map<String, Object> student = new HashMap<>();
         student.put("email", email);
         student.put("username", username);
         student.put("phone", phone);
-        student.put("password", password);
 
         db.collection("students")
                 .document(auth.getCurrentUser().getUid())
