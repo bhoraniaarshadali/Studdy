@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -15,36 +15,37 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.StuddyExamPortalApp"
         tools:targetApi="31">
-        <activity
-            android:name=".StudentRegistrationActivity"
-            android:exported="false" />
-        <activity
-            android:name="student.StudentDashboardActivity"
-            android:exported="false" />
-        <activity
-            android:name="faculty.FacultyDashboardActivity"
-            android:exported="false" /> <!-- Splash Activity as the only launcher activity -->
+
+        <!-- Splash Activity as the only launcher activity -->
         <activity
             android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Onboarding Activity -->
+        </activity>
+
+        <!-- Onboarding Activity -->
         <activity
             android:name=".OnboardingActivity"
-            android:exported="false" /> <!-- Login Activity -->
+            android:exported="false" />
+
+        <!-- Login Activity -->
         <activity
             android:name=".LoginActivity"
-            android:exported="false" /> <!-- Faculty Code Registration Activity -->
+            android:exported="false" />
+
+        <!-- Faculty Code Registration Activity -->
         <activity
             android:name=".FacultyCodeRegistrationActivity"
-            android:exported="false" /> <!-- Main Activity -->
+            android:exported="false" />
+
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
     </application>
 
 </manifest>
