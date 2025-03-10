@@ -96,18 +96,13 @@ public class LoginActivity extends AppCompatActivity {
             if (checkedId == R.id.facultyRadioButton) {
                 usernameEditText.setHint("Enter Staff Code");
                 usernameEditText.setInputType(InputType.TYPE_CLASS_TEXT);
-
-                // Apply uppercase filter and max length of 6
                 usernameEditText.setFilters(new InputFilter[]{
-                        new InputFilter.AllCaps(),  // Converts input to uppercase
-                        new InputFilter.LengthFilter(6)  // Restricts input to max 6 characters
+                        new InputFilter.AllCaps(),
+                        new InputFilter.LengthFilter(6)
                 });
-
             } else {
                 usernameEditText.setHint("Enter University Email");
                 usernameEditText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-
-                // Remove restrictions for email input
                 usernameEditText.setFilters(new InputFilter[]{});
             }
         });
@@ -147,7 +142,6 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(LoginActivity.this, "Please select a role", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             String role = ((RadioButton) findViewById(roleRadioGroup.getCheckedRadioButtonId())).getText().toString();
             String input = usernameEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
@@ -155,7 +149,6 @@ public class LoginActivity extends AppCompatActivity {
             if (!validateInputs(role, input, password)) {
                 return;
             }
-
             loadingDialog.show();
             authenticateUser(role, input, password);
         });
@@ -167,18 +160,15 @@ public class LoginActivity extends AppCompatActivity {
             startActivityForResult(signInIntent, 100);
         });
 
-        // Forgot Password click - Email is passed to ForgotPasswordActivity here
+        // Forgot Password click
         forgotPasswordTextView.setOnClickListener(v -> {
             String email = usernameEditText.getText().toString().trim();
-
             if (TextUtils.isEmpty(email) || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 usernameEditText.setError("Enter a valid email address");
                 return;
             }
-
-            // Start ForgotPasswordActivity for verification step
             Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
-            intent.putExtra("email", email); // Passing the email to ForgotPasswordActivity
+            intent.putExtra("email", email);
             startActivity(intent);
         });
     }
@@ -236,7 +226,6 @@ public class LoginActivity extends AppCompatActivity {
                 return false;
             }
         }
-
         if (password.isEmpty()) {
             passwordEditText.setError("Password is required");
             return false;
@@ -245,16 +234,12 @@ public class LoginActivity extends AppCompatActivity {
             passwordEditText.setError("Password must be at least 6 characters");
             return false;
         }
-
         return true;
     }
 
     private void authenticateUser(String role, String input, String password) {
         if (role.equals("Faculty")) {
-            // Fetch email from Firestore using staff code
-            db.collection("faculty")
-                    .whereEqualTo("staff_code", input)
-                    .get()
+            db.collection("faculty").whereEqualTo("staff_code", input).get()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful() && !task.getResult().isEmpty()) {
                             QuerySnapshot querySnapshot = task.getResult();
@@ -266,7 +251,6 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
         } else {
-            // For student, use the provided email
             signInWithEmail(input, password, role);
         }
     }
@@ -278,25 +262,21 @@ public class LoginActivity extends AppCompatActivity {
                         validateUserRoleFromFirestore(role, email);
                     } else {
                         loadingDialog.dismiss();
-                        Toast.makeText(LoginActivity.this,
-                                "Sign in failed: " + task.getException().getMessage(),
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "Sign in failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
     private void validateUserRoleFromFirestore(String role, String email) {
         String collection = role.equals("Faculty") ? "faculty" : "students";
-        db.collection(collection)
-                .whereEqualTo("email", email)
-                .get()
+        db.collection(collection).whereEqualTo("email", email).get()
                 .addOnCompleteListener(task -> {
                     loadingDialog.dismiss();
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
                         Toast.makeText(LoginActivity.this, "Sign in successful as " + role, Toast.LENGTH_SHORT).show();
                         navigateBasedOnRole(role);
                     } else {
-                        auth.signOut(); // Sign out if role validation fails
+                        auth.signOut();
                         Toast.makeText(LoginActivity.this, "User not found in " + role + " records", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -305,10 +285,8 @@ public class LoginActivity extends AppCompatActivity {
     private void navigateBasedOnRole(String role) {
         Intent intent;
         if (role.equals("Faculty")) {
-            Toast.makeText(LoginActivity.this, "Faculty", Toast.LENGTH_SHORT).show();
             intent = new Intent(this, FacultyDashboardActivity.class);
         } else {
-            Toast.makeText(LoginActivity.this, "Student", Toast.LENGTH_SHORT).show();
             intent = new Intent(this, StudentDashboardActivity.class);
         }
         startActivity(intent);
