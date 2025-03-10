@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.view.View;
+import android.text.TextUtils;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EditText;
@@ -91,7 +91,7 @@ public class LoginActivity extends AppCompatActivity {
             loadingImage.startAnimation(rotation);
         }
 
-// Update hint based on role selection
+        // Update hint based on role selection
         roleRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.facultyRadioButton) {
                 usernameEditText.setHint("Enter Staff Code");
@@ -111,7 +111,6 @@ public class LoginActivity extends AppCompatActivity {
                 usernameEditText.setFilters(new InputFilter[]{});
             }
         });
-
 
         // Faculty registration click
         facultyRegistration.setOnClickListener(v -> {
@@ -168,45 +167,20 @@ public class LoginActivity extends AppCompatActivity {
             startActivityForResult(signInIntent, 100);
         });
 
-        forgotPasswordTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(LoginActivity.this, "Forgot Password Clicked", Toast.LENGTH_SHORT).show();
+        // Forgot Password click - Email is passed to ForgotPasswordActivity here
+        forgotPasswordTextView.setOnClickListener(v -> {
+            String email = usernameEditText.getText().toString().trim();
+
+            if (TextUtils.isEmpty(email) || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                usernameEditText.setError("Enter a valid email address");
+                return;
             }
+
+            // Start ForgotPasswordActivity for verification step
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            intent.putExtra("email", email); // Passing the email to ForgotPasswordActivity
+            startActivity(intent);
         });
-
-//        forgotPasswordTextView.setOnClickListener(v -> {
-//            String email = usernameEditText.getText().toString().trim();
-//
-//            if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-//                usernameEditText.setError("Enter a valid email address");
-//                return;
-//            }
-//
-//            // Check if the email belongs to a faculty member
-//            db.collection("faculty")
-//                    .whereEqualTo("email", email)
-//                    .get()
-//                    .addOnCompleteListener(task -> {
-//                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
-//                            // Faculty found, restrict reset
-//                            Toast.makeText(LoginActivity.this, "Faculty must contact the admin for password reset", Toast.LENGTH_SHORT).show();
-//                        } else {
-//                            // Email is not in faculty collection, allow password reset
-//                            loadingDialog.show();
-//                            auth.sendPasswordResetEmail(email)
-//                                    .addOnCompleteListener(task1 -> {
-//                                        loadingDialog.dismiss();
-//                                        if (task1.isSuccessful()) {
-//                                            Toast.makeText(LoginActivity.this, "Password reset email sent", Toast.LENGTH_SHORT).show();
-//                                        } else {
-//                                            Toast.makeText(LoginActivity.this, "Failed to send reset email: " + task1.getException().getMessage(), Toast.LENGTH_SHORT).show();
-//                                        }
-//                                    });
-//                        }
-//                    });
-//        });
-
     }
 
     @Override
@@ -302,11 +276,6 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         validateUserRoleFromFirestore(role, email);
-
-                        // Update Firestore password if the role is "Student"
-                        if (role.equals("Student")) {
-                            //updatePasswordInFirestore(email, password);
-                        }
                     } else {
                         loadingDialog.dismiss();
                         Toast.makeText(LoginActivity.this,
