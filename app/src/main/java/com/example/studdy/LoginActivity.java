@@ -162,15 +162,28 @@ public class LoginActivity extends AppCompatActivity {
 
         // Forgot Password click
         forgotPasswordTextView.setOnClickListener(v -> {
-            String email = usernameEditText.getText().toString().trim();
-            if (TextUtils.isEmpty(email) || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                usernameEditText.setError("Enter a valid email address");
+            int selectedRoleId = roleRadioGroup.getCheckedRadioButtonId();
+
+            if (selectedRoleId == -1) {
+                Toast.makeText(LoginActivity.this, "Please select a role", Toast.LENGTH_SHORT).show();
                 return;
             }
-            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
-            intent.putExtra("email", email);
-            startActivity(intent);
+
+            if (selectedRoleId == R.id.facultyRadioButton) {
+                Toast.makeText(LoginActivity.this, "Contact Admin", Toast.LENGTH_SHORT).show();
+            } else {
+                String email = usernameEditText.getText().toString().trim();
+                if (TextUtils.isEmpty(email) || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    usernameEditText.setError("Enter a valid email address");
+                    return;
+                }
+                Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+                intent.putExtra("email", email);
+                startActivity(intent);
+            }
         });
+
+
     }
 
     @Override
