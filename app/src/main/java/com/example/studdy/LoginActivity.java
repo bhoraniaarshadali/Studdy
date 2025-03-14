@@ -39,7 +39,7 @@ import student.StudentDashboardActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final Pattern STAFF_CODE_PATTERN = Pattern.compile("^[A-Z0-9]{6,}$"); // Uppercase, more than 6 characters
+    private static final Pattern STAFF_CODE_PATTERN = Pattern.compile("^[A-Z0-9]{6,}$");
     private RadioGroup roleRadioGroup;
     private EditText usernameEditText, passwordEditText;
     private ImageView passwordToggle, facultyRegistration;

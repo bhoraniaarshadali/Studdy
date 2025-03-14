@@ -41,9 +41,7 @@ import javax.mail.internet.MimeMessage;
 
 public class FacultyRegistrationActivity extends AppCompatActivity {
 
-    // Precompiled regular expressions for validation
-    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9]{3,20}$"); // Alphanumeric, 3-20 characters
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9]{10}$"); // Exactly 10 digits
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9]{10}$");
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,}$");
     private ImageView backArrow, passwordToggle;
     private EditText usernameEditText, emailEditText, phoneEditText, passwordEditText;
@@ -52,8 +50,8 @@ public class FacultyRegistrationActivity extends AppCompatActivity {
     private boolean isPasswordVisible = false;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
-    private Dialog loadingDialog; // Custom loading dialog
-    private ExecutorService emailExecutor; // Executor for email sending
+    private Dialog loadingDialog;
+    private ExecutorService emailExecutor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,10 +62,8 @@ public class FacultyRegistrationActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Initialize Executor for email sending
         emailExecutor = Executors.newSingleThreadExecutor();
 
-        // Initialize views
         backArrow = findViewById(R.id.backButton);
         roleRadioGroup = findViewById(R.id.roleRadioGroup);
         usernameEditText = findViewById(R.id.facultyUsernameEditText);
@@ -77,28 +73,22 @@ public class FacultyRegistrationActivity extends AppCompatActivity {
         passwordToggle = findViewById(R.id.passwordToggle);
         signUpButton = findViewById(R.id.signUpButton);
 
-        // Initialize custom loading dialog
         loadingDialog = new Dialog(this);
         loadingDialog.setContentView(R.layout.loading_dialog);
-        loadingDialog.setCancelable(false); // Prevent dismissing by clicking outside
-        Objects.requireNonNull(loadingDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent); // Transparent background
+        loadingDialog.setCancelable(false);
+        Objects.requireNonNull(loadingDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
 
-        // Get the ImageView for the loading animation
+
         ImageView loadingImage = loadingDialog.findViewById(R.id.loadingImage);
         if (loadingImage != null) {
-            // Load and apply the rotation animation
             Animation rotation = AnimationUtils.loadAnimation(this, R.anim.rotate_loading);
             loadingImage.startAnimation(rotation);
         }
 
-        // Back arrow click
         backArrow.setOnClickListener(v -> {
-            Intent back = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(back);
-            //finish();
+            finish();
         });
 
-        // Toggle password visibility
         passwordToggle.setOnClickListener(v -> {
             if (isPasswordVisible) {
                 passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -109,26 +99,19 @@ public class FacultyRegistrationActivity extends AppCompatActivity {
                 passwordToggle.setImageResource(R.drawable.ic_eye); // Open eye
                 isPasswordVisible = true;
             }
-            // Move cursor to the end of the text
             passwordEditText.setSelection(passwordEditText.getText().length());
         });
 
-        // Sign up button click
         signUpButton.setOnClickListener(v -> {
             String username = usernameEditText.getText().toString().trim();
             String email = emailEditText.getText().toString().trim().toLowerCase(); // Normalize to lowercase
             String phone = phoneEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
 
-            // Validate inputs
             if (!validateInputs(username, email, phone, password)) {
                 return;
             }
-
-            // Show loading dialog
             loadingDialog.show();
-
-            // Start the registration process
             registerUser(email, password, username, phone);
         });
     }
@@ -153,7 +136,6 @@ public class FacultyRegistrationActivity extends AppCompatActivity {
             emailEditText.setError("Only @paruluniversity.ac.in emails are allowed");
             return false;
         }
-
         // Phone number validation
         if (phone.isEmpty()) {
             phoneEditText.setError("Phone number is required");
@@ -164,7 +146,6 @@ public class FacultyRegistrationActivity extends AppCompatActivity {
             return false;
         }
 
-        // Password validation
         if (password.isEmpty()) {
             passwordEditText.setError("Password is required");
             return false;
@@ -200,8 +181,6 @@ public class FacultyRegistrationActivity extends AppCompatActivity {
                     }
                 });
     }
-
-    // Separate method for saving to Firestore
     private void saveToFirestore(String email, String username, String phone, String staffCode) {
         Map<String, Object> faculty = new HashMap<>();
         faculty.put("email", email);

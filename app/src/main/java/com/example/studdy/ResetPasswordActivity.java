@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class ResetPasswordActivity extends AppCompatActivity {
@@ -73,20 +75,47 @@ public class ResetPasswordActivity extends AppCompatActivity {
             }
 
             loadingDialog.show();
-            auth.getCurrentUser().updatePassword(newPassword)
-                    .addOnCompleteListener(task -> {
-                        loadingDialog.dismiss();
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "Password updated successfully for " + email);
-                            Toast.makeText(ResetPasswordActivity.this, "Password updated successfully", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(ResetPasswordActivity.this, LoginActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } else {
-                            Log.e(TAG, "Password update failed: " + task.getException().getMessage());
-                            Toast.makeText(ResetPasswordActivity.this, "Failed to update password: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+
+            if (auth.getCurrentUser() != null) {
+                // Re-authenticate user with email & password
+                String userEmail = auth.getCurrentUser().getEmail();
+                String userPassword = getIntent().getStringExtra("password"); // Get old password from Intent
+
+                if (userPassword == null || userPassword.isEmpty()) {
+                    loadingDialog.dismiss();
+                    Toast.makeText(ResetPasswordActivity.this, "Re-authentication failed: Old password required", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                AuthCredential credential = EmailAuthProvider.getCredential(userEmail, userPassword);
+                auth.getCurrentUser().reauthenticate(credential)
+                        .addOnCompleteListener(reauthTask -> {
+                            if (reauthTask.isSuccessful()) {
+                                // After successful re-authentication, update password
+                                auth.getCurrentUser().updatePassword(newPassword)
+                                        .addOnCompleteListener(task -> {
+                                            loadingDialog.dismiss();
+                                            if (task.isSuccessful()) {
+                                                Log.d(TAG, "Password updated successfully");
+                                                Toast.makeText(ResetPasswordActivity.this, "Password updated successfully", Toast.LENGTH_SHORT).show();
+                                                startActivity(new Intent(ResetPasswordActivity.this, LoginActivity.class));
+                                                finish();
+                                            } else {
+                                                Log.e(TAG, "Password update failed: " + task.getException().getMessage());
+                                                Toast.makeText(ResetPasswordActivity.this, "Failed to update password: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            } else {
+                                loadingDialog.dismiss();
+                                Log.e(TAG, "Re-authentication failed: " + reauthTask.getException().getMessage());
+                                Toast.makeText(ResetPasswordActivity.this, "Re-authentication failed: " + reauthTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            } else {
+                loadingDialog.dismiss();
+                Toast.makeText(ResetPasswordActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
+            }
         });
+
     }
 }

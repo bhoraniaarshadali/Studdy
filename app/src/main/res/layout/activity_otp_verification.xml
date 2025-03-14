@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
-    android:orientation="vertical"
     android:padding="16dp">
 
     <!-- Back Button -->
@@ -17,7 +16,6 @@
         android:contentDescription="Back Button" />
 
     <!-- Title -->
-
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
@@ -31,8 +29,9 @@
         android:textSize="22sp"
         android:textStyle="bold" />
 
-
+    <!-- OTP Input -->
     <LinearLayout
+        android:id="@+id/otpInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/titleTextView"
@@ -62,6 +61,32 @@
             android:textSize="16sp" />
     </LinearLayout>
 
+    <!-- Resend OTP Timer -->
+    <TextView
+        android:id="@+id/resendTimerTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/otpInputLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:text="Resend OTP in 30s"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="16sp" />
+
+    <!-- Resend OTP Button -->
+    <Button
+        android:id="@+id/resendOtpButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/resendTimerTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="@color/purple_500"
+        android:enabled="false"
+        android:text="Resend OTP"
+        android:textColor="@color/white" />
+
+    <!-- Verify Button -->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/verifyButton"
         android:layout_width="match_parent"
