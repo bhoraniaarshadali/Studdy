@@ -106,6 +106,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
                                 // Email found, generate and send OTP
                                 String otp = generateOTP();
                                 new SendOtpEmailTask(email, otp).execute();
+                                Toast.makeText(getApplicationContext(), "OTP sent successfully..", Toast.LENGTH_SHORT).show();
                                 // Proceed to OTP verification activity
                                 Intent intent = new Intent(ForgotPasswordActivity.this, OtpVerificationActivity.class);
                                 intent.putExtra("email", email);

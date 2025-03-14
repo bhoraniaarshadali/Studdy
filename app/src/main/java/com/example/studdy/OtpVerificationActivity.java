@@ -116,6 +116,7 @@ public class OtpVerificationActivity extends AppCompatActivity {
                 finish();
             } else {
                 Toast.makeText(OtpVerificationActivity.this, "Invalid OTP", Toast.LENGTH_SHORT).show();
+                otpEditText.setText("");
             }
         });
 

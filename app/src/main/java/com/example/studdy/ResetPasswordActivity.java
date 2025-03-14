@@ -3,6 +3,7 @@ package com.example.studdy;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.animation.Animation;
@@ -26,6 +27,10 @@ public class ResetPasswordActivity extends AppCompatActivity {
     private Dialog loadingDialog;
     private FirebaseAuth auth;
     private String email;
+    private boolean isNewPasswordVisible = false;
+    private boolean isConfirmPasswordVisible = false;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,38 @@ public class ResetPasswordActivity extends AppCompatActivity {
             Animation rotation = AnimationUtils.loadAnimation(this, R.anim.rotate_loading);
             loadingImage.startAnimation(rotation);
         }
+
+        ImageView passwordToggle1, toggleConfirmPassword2;
+        passwordToggle1 = findViewById(R.id.passwordToggle1);
+        toggleConfirmPassword2 = findViewById(R.id.toggleConfirmPassword2);
+
+        // Toggle for new password field
+        passwordToggle1.setOnClickListener(v -> {
+            isNewPasswordVisible = !isNewPasswordVisible;
+            if (isNewPasswordVisible) {
+                newPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                passwordToggle1.setImageResource(R.drawable.ic_eye_open);
+            } else {
+                newPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                passwordToggle1.setImageResource(R.drawable.ic_eye_close);
+            }
+            newPasswordEditText.setSelection(newPasswordEditText.getText().length());
+        });
+
+// Toggle for confirm password field
+        toggleConfirmPassword2.setOnClickListener(v -> {
+            isConfirmPasswordVisible = !isConfirmPasswordVisible;
+            if (isConfirmPasswordVisible) {
+                confirmPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                toggleConfirmPassword2.setImageResource(R.drawable.ic_eye_open);
+            } else {
+                confirmPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                toggleConfirmPassword2.setImageResource(R.drawable.ic_eye_close);
+            }
+            confirmPasswordEditText.setSelection(confirmPasswordEditText.getText().length());
+        });
+
+
 
         // Get email from Intent
         email = getIntent().getStringExtra("email");

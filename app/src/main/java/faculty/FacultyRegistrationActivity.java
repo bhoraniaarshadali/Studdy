@@ -1,4 +1,4 @@
-package com.example.studdy;
+package faculty;
 
 import static SMTP.Credentials.SMTP_EMAIL;
 import static SMTP.Credentials.SMTP_PASSWORD;
@@ -18,6 +18,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+import com.example.studdy.LoginActivity;
+import com.example.studdy.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -92,11 +94,11 @@ public class FacultyRegistrationActivity extends AppCompatActivity {
         passwordToggle.setOnClickListener(v -> {
             if (isPasswordVisible) {
                 passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                passwordToggle.setImageResource(R.drawable.ic_eye); // Closed eye
+                passwordToggle.setImageResource(R.drawable.ic_eye_close); // Closed eye
                 isPasswordVisible = false;
             } else {
                 passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                passwordToggle.setImageResource(R.drawable.ic_eye); // Open eye
+                passwordToggle.setImageResource(R.drawable.ic_eye_open); // Open eye
                 isPasswordVisible = true;
             }
             passwordEditText.setSelection(passwordEditText.getText().length());
@@ -181,6 +183,7 @@ public class FacultyRegistrationActivity extends AppCompatActivity {
                     }
                 });
     }
+
     private void saveToFirestore(String email, String username, String phone, String staffCode) {
         Map<String, Object> faculty = new HashMap<>();
         faculty.put("email", email);

@@ -35,7 +35,9 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.regex.Pattern;
 
 import faculty.FacultyDashboardActivity;
+import faculty.FacultyRegistrationActivity;
 import student.StudentDashboardActivity;
+import student.StudentRegistrationActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -126,11 +128,11 @@ public class LoginActivity extends AppCompatActivity {
         passwordToggle.setOnClickListener(v -> {
             if (isPasswordVisible) {
                 passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                passwordToggle.setImageResource(R.drawable.ic_eye);
+                passwordToggle.setImageResource(R.drawable.ic_eye_close);
                 isPasswordVisible = false;
             } else {
                 passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                passwordToggle.setImageResource(R.drawable.ic_eye);
+                passwordToggle.setImageResource(R.drawable.ic_eye_open);
                 isPasswordVisible = true;
             }
             passwordEditText.setSelection(passwordEditText.getText().length());

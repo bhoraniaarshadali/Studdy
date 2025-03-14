@@ -1,4 +1,4 @@
-package com.example.studdy;
+package student;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -14,6 +14,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
+import com.example.studdy.LoginActivity;
+import com.example.studdy.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -83,11 +85,11 @@ public class StudentRegistrationActivity extends AppCompatActivity {
         passwordToggle.setOnClickListener(v -> {
             if (isPasswordVisible) {
                 passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                passwordToggle.setImageResource(R.drawable.ic_eye);
+                passwordToggle.setImageResource(R.drawable.ic_eye_close); //closed eye
                 isPasswordVisible = false;
             } else {
                 passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                passwordToggle.setImageResource(R.drawable.ic_eye);
+                passwordToggle.setImageResource(R.drawable.ic_eye_open); //open eye
                 isPasswordVisible = true;
             }
             passwordEditText.setSelection(passwordEditText.getText().length());

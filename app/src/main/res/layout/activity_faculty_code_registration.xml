@@ -233,7 +233,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center_vertical"
-                    android:src="@drawable/ic_eye" />
+                    android:src="@drawable/ic_eye_close" />
             </LinearLayout>
 
             <!-- Note about generating staff code -->
