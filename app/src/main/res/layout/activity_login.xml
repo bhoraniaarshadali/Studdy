@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/purple_500"
@@ -88,7 +89,8 @@
                 android:fontFamily="@font/poppins_regular"
                 android:text="Email / Staff code *"
                 android:textColor="#000000"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                tools:ignore="HardcodedText" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -174,8 +176,6 @@
                 android:textColor="@color/red"
                 android:textSize="14sp" />
 
-            <!-- Sign in button -->
-
             <!-- Sign in Button-->
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/signInButton"
@@ -188,17 +188,6 @@
                 android:text="Sign in"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp" />
-
-
-            <com.google.android.gms.common.SignInButton
-                android:id="@+id/googleSignInButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_google"
-                android:fontFamily="@font/poppins_regular"
-                android:text="Sign in with Google"
-                android:textColor="#000000"
-                android:textSize="16sp" />
 
         </LinearLayout>
     </ScrollView>

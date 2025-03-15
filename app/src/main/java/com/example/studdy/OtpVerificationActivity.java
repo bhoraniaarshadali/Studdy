@@ -23,7 +23,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.Objects;
+import com.google.firebase.auth.FirebaseAuth;
+
+import java.security.SecureRandom;
 import java.util.Properties;
 import java.util.Random;
 
@@ -44,6 +46,7 @@ public class OtpVerificationActivity extends AppCompatActivity {
     private ImageButton backButton;
     private Dialog loadingDialog;
     private String email, generatedOtp;
+    private FirebaseAuth auth;
     private CountDownTimer countDownTimer;
 
     @Override
@@ -51,8 +54,15 @@ public class OtpVerificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp_verification);
 
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance();
+
         // Initialize views
         otpEditText = findViewById(R.id.otpEditText);
+        otpEditText.setFilters(new InputFilter[]{
+                new InputFilter.AllCaps(),
+                new InputFilter.LengthFilter(4)
+        });
         verifyButton = findViewById(R.id.verifyButton);
         resendOtpButton = findViewById(R.id.resendOtpButton);
         resendTimerTextView = findViewById(R.id.resendTimerTextView);
@@ -62,13 +72,7 @@ public class OtpVerificationActivity extends AppCompatActivity {
         loadingDialog = new Dialog(this);
         loadingDialog.setContentView(R.layout.loading_dialog);
         loadingDialog.setCancelable(false);
-        Objects.requireNonNull(loadingDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
-
-
-        otpEditText.setFilters(new InputFilter[]{
-                new InputFilter.AllCaps(),
-                new InputFilter.LengthFilter(4)
-        });
+        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
         // Apply rotation animation to loading image
         ImageView loadingImage = loadingDialog.findViewById(R.id.loadingImage);
@@ -86,9 +90,11 @@ public class OtpVerificationActivity extends AppCompatActivity {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
+
             @Override
             public void afterTextChanged(Editable s) {
                 verifyButton.setEnabled(s.length() == 4);
@@ -107,27 +113,70 @@ public class OtpVerificationActivity extends AppCompatActivity {
         });
 
         // Verify button click
+//        verifyButton.setOnClickListener(v -> {
+//            String enteredOtp = otpEditText.getText().toString().trim();
+//            if (enteredOtp.equals(generatedOtp)) {
+//                loadingDialog.show();
+//                // Generate a random 8-character temporary password
+//                String tempPassword = generateTempPassword();
+//                // Update existing user's password
+//                auth.signInWithEmailAndPassword(email, "default") // Use a placeholder password to sign in
+//                        .addOnCompleteListener(signInTask -> {
+//                            if (signInTask.isSuccessful()) {
+//                                auth.getCurrentUser().updatePassword(tempPassword)
+//                                        .addOnCompleteListener(updateTask -> {
+//                                            if (updateTask.isSuccessful()) {
+//                                                auth.signOut();
+//                                                sendTempPasswordEmail(email, tempPassword);
+//                                                proceedToLogin();
+//                                            } else {
+//                                                loadingDialog.dismiss();
+//                                                Toast.makeText(OtpVerificationActivity.this, "Failed to update password", Toast.LENGTH_SHORT).show();
+//                                            }
+//                                        });
+//                            } else {
+//                                loadingDialog.dismiss();
+//                                Toast.makeText(OtpVerificationActivity.this, "Failed to sign in", Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
+//            } else {
+//                Toast.makeText(OtpVerificationActivity.this, "Invalid OTP", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+
+        // Resend OTP button click
+
+        // Verify button click
         verifyButton.setOnClickListener(v -> {
             String enteredOtp = otpEditText.getText().toString().trim();
             if (enteredOtp.equals(generatedOtp)) {
-                Intent intent = new Intent(OtpVerificationActivity.this, ResetPasswordActivity.class);
-                intent.putExtra("email", email);
-                startActivity(intent);
-                finish();
+                loadingDialog.show();
+                // Send password reset email instead of manual password update
+                auth.sendPasswordResetEmail(email)
+                        .addOnCompleteListener(task -> {
+                            loadingDialog.dismiss();
+                            if (task.isSuccessful()) {
+                                Toast.makeText(OtpVerificationActivity.this,
+                                        "Password reset email sent. Check your inbox.",
+                                        Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(OtpVerificationActivity.this, LoginActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(OtpVerificationActivity.this,
+                                        "Failed to send reset email: " + task.getException().getMessage(),
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        });
             } else {
                 Toast.makeText(OtpVerificationActivity.this, "Invalid OTP", Toast.LENGTH_SHORT).show();
-                otpEditText.setText("");
             }
         });
 
-        // Resend OTP button click
         resendOtpButton.setOnClickListener(v -> {
             loadingDialog.show();
-            // Generate a new OTP
             generatedOtp = generateOTP();
-            // Resend the OTP
             new SendOtpEmailTask(email, generatedOtp).execute();
-            // Restart the countdown timer
             startResendTimer();
         });
     }
@@ -135,7 +184,7 @@ public class OtpVerificationActivity extends AppCompatActivity {
     // Method to start the 30-second countdown timer
     private void startResendTimer() {
         resendOtpButton.setEnabled(false);
-        countDownTimer = new CountDownTimer(30000, 1000) { // 30 seconds, tick every 1 second
+        countDownTimer = new CountDownTimer(30000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 resendTimerTextView.setText("Resend OTP in " + (millisUntilFinished / 1000) + "s");
@@ -155,15 +204,35 @@ public class OtpVerificationActivity extends AppCompatActivity {
         return String.format("%04d", random.nextInt(10000));
     }
 
+    // Method to generate a random 8-character temporary password
+    private String generateTempPassword() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder(8);
+        for (int i = 0; i < 8; i++) {
+            password.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return password.toString();
+    }
+
+    // Method to proceed to LoginActivity
+    private void proceedToLogin() {
+        loadingDialog.dismiss();
+        Toast.makeText(OtpVerificationActivity.this, "Temporary password sent. Please log in.", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(OtpVerificationActivity.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (countDownTimer != null) {
-            countDownTimer.cancel(); // Cancel the timer to avoid memory leaks
+            countDownTimer.cancel();
         }
     }
 
-    // AsyncTask to send OTP via email using SMTP
+    // AsyncTask to send OTP via email
     private class SendOtpEmailTask extends AsyncTask<Void, Void, Boolean> {
         private final String email;
         private final String otp;
@@ -177,14 +246,12 @@ public class OtpVerificationActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... voids) {
             try {
-                // Configure SMTP properties
                 Properties props = new Properties();
                 props.put("mail.smtp.auth", "true");
                 props.put("mail.smtp.starttls.enable", "true");
                 props.put("mail.smtp.host", "smtp.gmail.com");
                 props.put("mail.smtp.port", "587");
 
-                // Create a session with authentication
                 Session session = Session.getInstance(props, new javax.mail.Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
@@ -192,16 +259,14 @@ public class OtpVerificationActivity extends AppCompatActivity {
                     }
                 });
 
-                // Create a new email message
                 Message message = new MimeMessage(session);
                 message.setFrom(new InternetAddress(SMTP_EMAIL));
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
-                message.setSubject("Your OTP for Password Reset");
-                message.setText("Your OTP for resetting your password is: " + otp + "\n\nPlease use this OTP to verify your identity.");
+                message.setSubject("Your OTP");
+                message.setText("Your OTP is: " + otp);
 
-                // Send the email
                 Transport.send(message);
-                Log.d(TAG, "OTP " + otp + " sent to " + email);
+                Log.d(TAG, "OTP sent to " + email);
                 return true;
             } catch (MessagingException e) {
                 Log.e(TAG, "Failed to send OTP email: " + e.getMessage());
@@ -216,7 +281,7 @@ public class OtpVerificationActivity extends AppCompatActivity {
             if (success) {
                 Toast.makeText(OtpVerificationActivity.this, "OTP resent. Check your email.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(OtpVerificationActivity.this, "Failed to resend OTP: " + errorMessage, Toast.LENGTH_LONG).show();
+                Toast.makeText(OtpVerificationActivity.this, "Failed to resend OTP", Toast.LENGTH_LONG).show();
             }
         }
     }

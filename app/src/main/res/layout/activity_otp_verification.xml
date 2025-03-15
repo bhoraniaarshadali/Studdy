@@ -67,26 +67,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/otpInputLayout"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="5sp"
+        android:layout_marginTop="5dp"
+        android:fontFamily="@font/poppins_regular"
         android:text="Resend OTP in 30s"
         android:textColor="@android:color/darker_gray"
-        android:textSize="16sp" />
+        android:textSize="15sp" />
 
-    <!-- Resend OTP Button -->
+
+    <!-- Verify Button -->
     <Button
         android:id="@+id/resendOtpButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/resendTimerTextView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:backgroundTint="@color/purple_500"
+        android:layout_below="@+id/otpInputLayout"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="-10sp"
+        android:layout_marginEnd="-22sp"
+        android:background="?android:attr/selectableItemBackground"
         android:enabled="false"
+        android:fontFamily="@font/poppins_medium"
         android:text="Resend OTP"
-        android:textColor="@color/white" />
+        android:textColor="@color/purple_500"
+        android:textSize="17sp" />
 
-    <!-- Verify Button -->
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/verifyButton"
         android:layout_width="match_parent"

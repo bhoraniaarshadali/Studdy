@@ -21,9 +21,6 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -32,6 +29,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import faculty.FacultyDashboardActivity;
@@ -46,13 +44,11 @@ public class LoginActivity extends AppCompatActivity {
     private EditText usernameEditText, passwordEditText;
     private ImageView passwordToggle, facultyRegistration;
     private AppCompatButton signInButton;
-    private SignInButton googleSignInButton;
     private TextView forgotPasswordTextView;
     private boolean isPasswordVisible = false;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private Dialog loadingDialog;
-    private GoogleSignInClient googleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,13 +59,6 @@ public class LoginActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Configure Google Sign-In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
-
         // Initialize views
         roleRadioGroup = findViewById(R.id.roleRadioGroup);
         usernameEditText = findViewById(R.id.usernameEditText);
@@ -77,14 +66,13 @@ public class LoginActivity extends AppCompatActivity {
         passwordToggle = findViewById(R.id.passwordToggle);
         facultyRegistration = findViewById(R.id.facultyRegistration);
         signInButton = findViewById(R.id.signInButton);
-        googleSignInButton = findViewById(R.id.googleSignInButton);
         forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView);
 
         // Initialize loading dialog
         loadingDialog = new Dialog(this);
         loadingDialog.setContentView(R.layout.loading_dialog);
         loadingDialog.setCancelable(false);
-        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        Objects.requireNonNull(loadingDialog.getWindow()).setBackgroundDrawableResource(android.R.color.transparent);
 
         // Apply rotation animation to loading image
         ImageView loadingImage = loadingDialog.findViewById(R.id.loadingImage);
@@ -153,13 +141,6 @@ public class LoginActivity extends AppCompatActivity {
             }
             loadingDialog.show();
             authenticateUser(role, input, password);
-        });
-
-        // Google sign-in button click
-        googleSignInButton.setOnClickListener(v -> {
-            loadingDialog.show();
-            Intent signInIntent = googleSignInClient.getSignInIntent();
-            startActivityForResult(signInIntent, 100);
         });
 
         // Forgot Password click
