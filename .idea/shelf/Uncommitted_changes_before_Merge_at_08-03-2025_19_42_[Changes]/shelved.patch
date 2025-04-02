@@ -1,0 +1,444 @@
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\">\r\n\r\n    <uses-permission android:name=\"android.permission.INTERNET\" />\r\n    <uses-permission android:name=\"android.permission.CHANGE_WIFI_STATE\"/>\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\r\n        android:fullBackupContent=\"@xml/backup_rules\"\r\n        android:icon=\"@drawable/app_logo\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@drawable/app_logo\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/Theme.StuddyExamPortalApp\"\r\n        tools:targetApi=\"31\">\r\n\r\n        <!-- Splash Activity as the only launcher activity -->\r\n        <activity\r\n            android:name=\".SplashActivity\"\r\n            android:exported=\"true\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n\r\n        <!-- Onboarding Activity -->\r\n        <activity\r\n            android:name=\".OnboardingActivity\"\r\n            android:exported=\"false\" />\r\n\r\n        <!-- Login Activity -->\r\n        <activity\r\n            android:name=\".LoginActivity\"\r\n            android:exported=\"false\" />\r\n\r\n        <!-- Faculty Code Registration Activity -->\r\n        <activity\r\n            android:name=\".FacultyCodeRegistrationActivity\"\r\n            android:exported=\"false\" />\r\n\r\n        <!-- Main Activity -->\r\n        <activity\r\n            android:name=\".MainActivity\"\r\n            android:exported=\"false\" />\r\n\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision 69d24dcac1ba16ff8e209fb78c77af1b5f848021)
++++ b/app/src/main/AndroidManifest.xml	(date 1741443138775)
+@@ -3,7 +3,7 @@
+     xmlns:tools="http://schemas.android.com/tools">
+ 
+     <uses-permission android:name="android.permission.INTERNET" />
+-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
++    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+ 
+     <application
+         android:allowBackup="true"
+@@ -15,37 +15,36 @@
+         android:supportsRtl="true"
+         android:theme="@style/Theme.StuddyExamPortalApp"
+         tools:targetApi="31">
+-
+-        <!-- Splash Activity as the only launcher activity -->
++        <activity
++            android:name=".StudentRegistrationActivity"
++            android:exported="false" />
++        <activity
++            android:name="student.StudentDashboardActivity"
++            android:exported="false" />
++        <activity
++            android:name="faculty.FacultyDashboardActivity"
++            android:exported="false" /> <!-- Splash Activity as the only launcher activity -->
+         <activity
+             android:name=".SplashActivity"
+             android:exported="true">
+             <intent-filter>
+                 <action android:name="android.intent.action.MAIN" />
++
+                 <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
+-        </activity>
+-
+-        <!-- Onboarding Activity -->
++        </activity> <!-- Onboarding Activity -->
+         <activity
+             android:name=".OnboardingActivity"
+-            android:exported="false" />
+-
+-        <!-- Login Activity -->
++            android:exported="false" /> <!-- Login Activity -->
+         <activity
+             android:name=".LoginActivity"
+-            android:exported="false" />
+-
+-        <!-- Faculty Code Registration Activity -->
++            android:exported="false" /> <!-- Faculty Code Registration Activity -->
+         <activity
+-            android:name=".FacultyCodeRegistrationActivity"
+-            android:exported="false" />
+-
+-        <!-- Main Activity -->
++            android:name=".FacultyRegistrationActivity"
++            android:exported="false" /> <!-- Main Activity -->
+         <activity
+             android:name=".MainActivity"
+             android:exported="false" />
+-
+     </application>
+ 
+ </manifest>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_faculty_dashboard.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_faculty_dashboard.xml b/app/src/main/res/layout/activity_faculty_dashboard.xml
+new file mode 100644
+--- /dev/null	(date 1741443138778)
++++ b/app/src/main/res/layout/activity_faculty_dashboard.xml	(date 1741443138778)
+@@ -0,0 +1,71 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:id="@+id/main"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:padding="16dp"
++    tools:context="faculty.FacultyDashboardActivity">
++
++    <!-- Welcome Text -->
++    <TextView
++        android:id="@+id/welcomeText"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="20dp"
++        android:text="Welcome, Faculty!"
++        android:textColor="@color/black"
++        android:textSize="22sp"
++        android:textStyle="bold"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toTopOf="parent" />
++
++    <!-- Manage Students Button -->
++    <Button
++        android:id="@+id/manageStudentsButton"
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="20dp"
++        android:text="Manage Students"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@id/welcomeText" />
++
++    <!-- Manage Exams Button -->
++    <Button
++        android:id="@+id/manageExamsButton"
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="16dp"
++        android:text="Manage Exams"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@id/manageStudentsButton" />
++
++    <!-- View Reports Button -->
++    <Button
++        android:id="@+id/viewReportsButton"
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="16dp"
++        android:text="View Reports"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@id/manageExamsButton" />
++
++    <!-- Logout Button -->
++    <Button
++        android:id="@+id/logoutButton"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="30dp"
++        android:backgroundTint="@android:color/holo_red_dark"
++        android:text="Logout"
++        android:textColor="@android:color/white"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@id/viewReportsButton" />
++
++</androidx.constraintlayout.widget.ConstraintLayout>
+Index: app/src/main/res/layout/activity_student_dashboard.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_student_dashboard.xml b/app/src/main/res/layout/activity_student_dashboard.xml
+new file mode 100644
+--- /dev/null	(date 1741443138779)
++++ b/app/src/main/res/layout/activity_student_dashboard.xml	(date 1741443138779)
+@@ -0,0 +1,71 @@
++<?xml version="1.0" encoding="utf-8"?>
++<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
++    xmlns:app="http://schemas.android.com/apk/res-auto"
++    xmlns:tools="http://schemas.android.com/tools"
++    android:id="@+id/main"
++    android:layout_width="match_parent"
++    android:layout_height="match_parent"
++    android:padding="16dp"
++    tools:context="student.StudentDashboardActivity">
++
++    <!-- Welcome Text -->
++    <TextView
++        android:id="@+id/welcomeText"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="20dp"
++        android:text="Welcome, Student!"
++        android:textColor="@color/black"
++        android:textSize="22sp"
++        android:textStyle="bold"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toTopOf="parent" />
++
++    <!-- View Exams Button -->
++    <Button
++        android:id="@+id/viewExamsButton"
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="20dp"
++        android:text="View Exams"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@id/welcomeText" />
++
++    <!-- View Progress Button -->
++    <Button
++        android:id="@+id/viewProgressButton"
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="16dp"
++        android:text="View Progress"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@id/viewExamsButton" />
++
++    <!-- View Reports Button -->
++    <Button
++        android:id="@+id/viewReportsButton"
++        android:layout_width="0dp"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="16dp"
++        android:text="View Reports"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@id/viewProgressButton" />
++
++    <!-- Logout Button -->
++    <Button
++        android:id="@+id/logoutButton"
++        android:layout_width="wrap_content"
++        android:layout_height="wrap_content"
++        android:layout_marginTop="30dp"
++        android:backgroundTint="@android:color/holo_red_dark"
++        android:text="Logout"
++        android:textColor="@android:color/white"
++        app:layout_constraintEnd_toEndOf="parent"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toBottomOf="@id/viewReportsButton" />
++
++</androidx.constraintlayout.widget.ConstraintLayout>
+Index: app/src/main/java/faculty/FacultyDashboardActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/faculty/FacultyDashboardActivity.java b/app/src/main/java/faculty/FacultyDashboardActivity.java
+new file mode 100644
+--- /dev/null	(date 1741443138777)
++++ b/app/src/main/java/faculty/FacultyDashboardActivity.java	(date 1741443138777)
+@@ -0,0 +1,26 @@
++package faculty;
++
++import android.os.Bundle;
++
++import androidx.activity.EdgeToEdge;
++import androidx.appcompat.app.AppCompatActivity;
++import androidx.core.graphics.Insets;
++import androidx.core.view.ViewCompat;
++import androidx.core.view.WindowInsetsCompat;
++
++import com.example.studdy.R;
++
++public class FacultyDashboardActivity extends AppCompatActivity {
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        EdgeToEdge.enable(this);
++        setContentView(R.layout.activity_faculty_dashboard);
++        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
++            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
++            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
++            return insets;
++        });
++    }
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/studdy/LoginActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.studdy;\r\n\r\nimport android.app.Dialog;\r\nimport android.content.Intent;\r\nimport android.os.Bundle;\r\nimport android.text.InputFilter;\r\nimport android.text.InputType;\r\nimport android.util.Log;\r\nimport android.view.View;\r\nimport android.view.animation.Animation;\r\nimport android.view.animation.AnimationUtils;\r\nimport android.widget.EditText;\r\nimport android.widget.ImageView;\r\nimport android.widget.RadioButton;\r\nimport android.widget.RadioGroup;\r\nimport android.widget.TextView;\r\nimport android.widget.Toast;\r\n\r\nimport androidx.appcompat.app.AlertDialog;\r\nimport androidx.appcompat.app.AppCompatActivity;\r\nimport androidx.appcompat.widget.AppCompatButton;\r\n\r\nimport com.google.android.gms.auth.api.signin.GoogleSignIn;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInAccount;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInClient;\r\nimport com.google.android.gms.auth.api.signin.GoogleSignInOptions;\r\nimport com.google.android.gms.common.SignInButton;\r\nimport com.google.android.gms.common.api.ApiException;\r\nimport com.google.android.gms.tasks.Task;\r\nimport com.google.firebase.auth.AuthCredential;\r\nimport com.google.firebase.auth.FirebaseAuth;\r\nimport com.google.firebase.auth.GoogleAuthProvider;\r\nimport com.google.firebase.firestore.FirebaseFirestore;\r\nimport com.google.firebase.firestore.QuerySnapshot;\r\n\r\nimport java.util.regex.Pattern;\r\n\r\nimport faculty.FacultyDashboardActivity;\r\nimport student.StudentDashboardActivity;\r\n\r\npublic class LoginActivity extends AppCompatActivity {\r\n\r\n    private static final Pattern STAFF_CODE_PATTERN = Pattern.compile(\"^[A-Z0-9]{6,}$\"); // Uppercase, more than 6 characters\r\n    private RadioGroup roleRadioGroup;\r\n    private EditText usernameEditText, passwordEditText;\r\n    private ImageView passwordToggle, facultyRegistration;\r\n    private AppCompatButton signInButton;\r\n    private SignInButton googleSignInButton;\r\n    private TextView forgotPasswordTextView;\r\n    private boolean isPasswordVisible = false;\r\n    private FirebaseAuth auth;\r\n    private FirebaseFirestore db;\r\n    private Dialog loadingDialog;\r\n    private GoogleSignInClient googleSignInClient;\r\n\r\n    @Override\r\n    protected void onCreate(Bundle savedInstanceState) {\r\n        super.onCreate(savedInstanceState);\r\n        setContentView(R.layout.activity_login);\r\n\r\n        // Initialize Firebase Auth and Firestore\r\n        auth = FirebaseAuth.getInstance();\r\n        db = FirebaseFirestore.getInstance();\r\n\r\n        // Configure Google Sign-In\r\n        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)\r\n                .requestIdToken(getString(R.string.default_web_client_id))\r\n                .requestEmail()\r\n                .build();\r\n        googleSignInClient = GoogleSignIn.getClient(this, gso);\r\n\r\n        // Initialize views\r\n        roleRadioGroup = findViewById(R.id.roleRadioGroup);\r\n        usernameEditText = findViewById(R.id.usernameEditText);\r\n        passwordEditText = findViewById(R.id.passwordEditText);\r\n        passwordToggle = findViewById(R.id.passwordToggle);\r\n        facultyRegistration = findViewById(R.id.facultyRegistration);\r\n        signInButton = findViewById(R.id.signInButton);\r\n        googleSignInButton = findViewById(R.id.googleSignInButton);\r\n        forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView);\r\n\r\n        // Initialize loading dialog\r\n        loadingDialog = new Dialog(this);\r\n        loadingDialog.setContentView(R.layout.loading_dialog);\r\n        loadingDialog.setCancelable(false);\r\n        loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);\r\n\r\n        // Apply rotation animation to loading image\r\n        ImageView loadingImage = loadingDialog.findViewById(R.id.loadingImage);\r\n        if (loadingImage != null) {\r\n            Animation rotation = AnimationUtils.loadAnimation(this, R.anim.rotate_loading);\r\n            loadingImage.startAnimation(rotation);\r\n        }\r\n\r\n// Update hint based on role selection\r\n        roleRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {\r\n            if (checkedId == R.id.facultyRadioButton) {\r\n                usernameEditText.setHint(\"Enter Staff Code\");\r\n                usernameEditText.setInputType(InputType.TYPE_CLASS_TEXT);\r\n\r\n                // Apply uppercase filter and max length of 6\r\n                usernameEditText.setFilters(new InputFilter[]{\r\n                        new InputFilter.AllCaps(),  // Converts input to uppercase\r\n                        new InputFilter.LengthFilter(6)  // Restricts input to max 6 characters\r\n                });\r\n\r\n            } else {\r\n                usernameEditText.setHint(\"Enter University Email\");\r\n                usernameEditText.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);\r\n\r\n                // Remove restrictions for email input\r\n                usernameEditText.setFilters(new InputFilter[]{});\r\n            }\r\n        });\r\n\r\n\r\n        // Faculty registration click\r\n        facultyRegistration.setOnClickListener(v -> {\r\n            new AlertDialog.Builder(this)\r\n                    .setTitle(\"Select Role\")\r\n                    .setItems(new String[]{\"Faculty\", \"Student\"}, (dialog, which) -> {\r\n                        if (which == 0) {\r\n                            startActivity(new Intent(LoginActivity.this, FacultyCodeRegistrationActivity.class));\r\n                        } else {\r\n                            startActivity(new Intent(LoginActivity.this, StudentRegistrationActivity.class));\r\n                        }\r\n                    })\r\n                    .setNegativeButton(\"Cancel\", null)\r\n                    .show();\r\n        });\r\n\r\n        // Toggle password visibility\r\n        passwordToggle.setOnClickListener(v -> {\r\n            if (isPasswordVisible) {\r\n                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);\r\n                passwordToggle.setImageResource(R.drawable.ic_eye);\r\n                isPasswordVisible = false;\r\n            } else {\r\n                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);\r\n                passwordToggle.setImageResource(R.drawable.ic_eye);\r\n                isPasswordVisible = true;\r\n            }\r\n            passwordEditText.setSelection(passwordEditText.getText().length());\r\n        });\r\n\r\n        // Sign in button click\r\n        signInButton.setOnClickListener(v -> {\r\n            if (roleRadioGroup.getCheckedRadioButtonId() == -1) {\r\n                Toast.makeText(LoginActivity.this, \"Please select a role\", Toast.LENGTH_SHORT).show();\r\n                return;\r\n            }\r\n\r\n            String role = ((RadioButton) findViewById(roleRadioGroup.getCheckedRadioButtonId())).getText().toString();\r\n            String input = usernameEditText.getText().toString().trim();\r\n            String password = passwordEditText.getText().toString().trim();\r\n\r\n            if (!validateInputs(role, input, password)) {\r\n                return;\r\n            }\r\n\r\n            loadingDialog.show();\r\n            authenticateUser(role, input, password);\r\n        });\r\n\r\n        // Google sign-in button click\r\n        googleSignInButton.setOnClickListener(v -> {\r\n            loadingDialog.show();\r\n            Intent signInIntent = googleSignInClient.getSignInIntent();\r\n            startActivityForResult(signInIntent, 100);\r\n        });\r\n\r\n        forgotPasswordTextView.setOnClickListener(new View.OnClickListener() {\r\n            @Override\r\n            public void onClick(View view) {\r\n                Toast.makeText(LoginActivity.this, \"Forgot Password Clicked\", Toast.LENGTH_SHORT).show();\r\n            }\r\n        });\r\n\r\n//        forgotPasswordTextView.setOnClickListener(v -> {\r\n//            String email = usernameEditText.getText().toString().trim();\r\n//\r\n//            if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {\r\n//                usernameEditText.setError(\"Enter a valid email address\");\r\n//                return;\r\n//            }\r\n//\r\n//            // Check if the email belongs to a faculty member\r\n//            db.collection(\"faculty\")\r\n//                    .whereEqualTo(\"email\", email)\r\n//                    .get()\r\n//                    .addOnCompleteListener(task -> {\r\n//                        if (task.isSuccessful() && !task.getResult().isEmpty()) {\r\n//                            // Faculty found, restrict reset\r\n//                            Toast.makeText(LoginActivity.this, \"Faculty must contact the admin for password reset\", Toast.LENGTH_SHORT).show();\r\n//                        } else {\r\n//                            // Email is not in faculty collection, allow password reset\r\n//                            loadingDialog.show();\r\n//                            auth.sendPasswordResetEmail(email)\r\n//                                    .addOnCompleteListener(task1 -> {\r\n//                                        loadingDialog.dismiss();\r\n//                                        if (task1.isSuccessful()) {\r\n//                                            Toast.makeText(LoginActivity.this, \"Password reset email sent\", Toast.LENGTH_SHORT).show();\r\n//                                        } else {\r\n//                                            Toast.makeText(LoginActivity.this, \"Failed to send reset email: \" + task1.getException().getMessage(), Toast.LENGTH_SHORT).show();\r\n//                                        }\r\n//                                    });\r\n//                        }\r\n//                    });\r\n//        });\r\n\r\n    }\r\n\r\n    @Override\r\n    protected void onActivityResult(int requestCode, int resultCode, Intent data) {\r\n        super.onActivityResult(requestCode, resultCode, data);\r\n        if (requestCode == 100) {\r\n            loadingDialog.dismiss();\r\n            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);\r\n            try {\r\n                GoogleSignInAccount account = task.getResult(ApiException.class);\r\n                firebaseAuthWithGoogle(account);\r\n            } catch (ApiException e) {\r\n                Toast.makeText(this, \"Google sign in failed: \" + e.getMessage(), Toast.LENGTH_SHORT).show();\r\n            }\r\n        }\r\n    }\r\n\r\n    private void firebaseAuthWithGoogle(GoogleSignInAccount account) {\r\n        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);\r\n        auth.signInWithCredential(credential)\r\n                .addOnCompleteListener(this, task -> {\r\n                    loadingDialog.dismiss();\r\n                    if (task.isSuccessful()) {\r\n                        String role = ((RadioButton) findViewById(roleRadioGroup.getCheckedRadioButtonId())).getText().toString();\r\n                        validateUserRoleFromFirestore(role, account.getEmail());\r\n                    } else {\r\n                        Toast.makeText(this, \"Google sign in failed: \" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();\r\n                    }\r\n                });\r\n    }\r\n\r\n    private boolean validateInputs(String role, String input, String password) {\r\n        if (role.equals(\"Faculty\")) {\r\n            if (input.isEmpty()) {\r\n                usernameEditText.setError(\"Staff code is required\");\r\n                return false;\r\n            }\r\n            if (!STAFF_CODE_PATTERN.matcher(input).matches()) {\r\n                usernameEditText.setError(\"Staff code must be uppercase and more than 6 characters\");\r\n                return false;\r\n            }\r\n        } else {\r\n            if (input.isEmpty()) {\r\n                usernameEditText.setError(\"Email is required\");\r\n                return false;\r\n            }\r\n            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(input).matches()) {\r\n                usernameEditText.setError(\"Enter a valid email address\");\r\n                return false;\r\n            }\r\n            if (!input.endsWith(\"@paruluniversity.ac.in\")) {\r\n                usernameEditText.setError(\"Only @paruluniversity.ac.in emails are allowed\");\r\n                return false;\r\n            }\r\n        }\r\n\r\n        if (password.isEmpty()) {\r\n            passwordEditText.setError(\"Password is required\");\r\n            return false;\r\n        }\r\n        if (password.length() < 6) {\r\n            passwordEditText.setError(\"Password must be at least 6 characters\");\r\n            return false;\r\n        }\r\n\r\n        return true;\r\n    }\r\n\r\n    private void authenticateUser(String role, String input, String password) {\r\n        if (role.equals(\"Faculty\")) {\r\n            // Fetch email from Firestore using staff code\r\n            db.collection(\"faculty\")\r\n                    .whereEqualTo(\"staff_code\", input)\r\n                    .get()\r\n                    .addOnCompleteListener(task -> {\r\n                        if (task.isSuccessful() && !task.getResult().isEmpty()) {\r\n                            QuerySnapshot querySnapshot = task.getResult();\r\n                            String facultyEmail = querySnapshot.getDocuments().get(0).getString(\"email\");\r\n                            signInWithEmail(facultyEmail, password, role);\r\n                        } else {\r\n                            loadingDialog.dismiss();\r\n                            usernameEditText.setError(\"Invalid staff code\");\r\n                        }\r\n                    });\r\n        } else {\r\n            // For student, use the provided email\r\n            signInWithEmail(input, password, role);\r\n        }\r\n    }\r\n\r\n    private void signInWithEmail(String email, String password, String role) {\r\n        auth.signInWithEmailAndPassword(email, password)\r\n                .addOnCompleteListener(this, task -> {\r\n                    if (task.isSuccessful()) {\r\n                        validateUserRoleFromFirestore(role, email);\r\n\r\n                        // Update Firestore password if the role is \"Student\"\r\n                        if (role.equals(\"Student\")) {\r\n                            updatePasswordInFirestore(email, password);\r\n                        }\r\n                    } else {\r\n                        loadingDialog.dismiss();\r\n                        Toast.makeText(LoginActivity.this,\r\n                                \"Sign in failed: \" + task.getException().getMessage(),\r\n                                Toast.LENGTH_SHORT).show();\r\n                    }\r\n                });\r\n    }\r\n\r\n    // Function to update password in Firestore\r\n    private void updatePasswordInFirestore(String email, String newPassword) {\r\n        db.collection(\"students\")\r\n                .whereEqualTo(\"email\", email)\r\n                .get()\r\n                .addOnCompleteListener(task -> {\r\n                    if (task.isSuccessful() && !task.getResult().isEmpty()) {\r\n                        String documentId = task.getResult().getDocuments().get(0).getId();\r\n                        db.collection(\"students\").document(documentId)\r\n                                .update(\"password\", newPassword)\r\n                                .addOnSuccessListener(aVoid ->\r\n                                        Toast.makeText(LoginActivity.this, \"Password updated in Firestore\", Toast.LENGTH_SHORT).show())\r\n                                .addOnFailureListener(e ->\r\n                                        Toast.makeText(LoginActivity.this, \"Failed to update password in Firestore\", Toast.LENGTH_SHORT).show());\r\n                    }\r\n                });\r\n    }\r\n\r\n\r\n    private void validateUserRoleFromFirestore(String role, String email) {\r\n        String collection = role.equals(\"Faculty\") ? \"faculty\" : \"students\";\r\n        db.collection(collection)\r\n                .whereEqualTo(\"email\", email)\r\n                .get()\r\n                .addOnCompleteListener(task -> {\r\n                    loadingDialog.dismiss();\r\n                    if (task.isSuccessful() && !task.getResult().isEmpty()) {\r\n                        Toast.makeText(LoginActivity.this, \"Sign in successful as \" + role, Toast.LENGTH_SHORT).show();\r\n                        navigateBasedOnRole(role);\r\n                    } else {\r\n                        auth.signOut(); // Sign out if role validation fails\r\n                        Toast.makeText(LoginActivity.this, \"User not found in \" + role + \" records\", Toast.LENGTH_SHORT).show();\r\n                    }\r\n                });\r\n    }\r\n\r\n    private void navigateBasedOnRole(String role) {\r\n        Intent intent;\r\n        if (role.equals(\"Faculty\")) {\r\n            Toast.makeText(LoginActivity.this, \"Faculty\", Toast.LENGTH_SHORT).show();\r\n            intent = new Intent(this, FacultyDashboardActivity.class);\r\n        } else {\r\n            Toast.makeText(LoginActivity.this, \"Student\", Toast.LENGTH_SHORT).show();\r\n            intent = new Intent(this, StudentDashboardActivity.class);\r\n        }\r\n        startActivity(intent);\r\n        finish();\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/studdy/LoginActivity.java b/app/src/main/java/com/example/studdy/LoginActivity.java
+--- a/app/src/main/java/com/example/studdy/LoginActivity.java	(revision 69d24dcac1ba16ff8e209fb78c77af1b5f848021)
++++ b/app/src/main/java/com/example/studdy/LoginActivity.java	(date 1741443138776)
+@@ -5,7 +5,6 @@
+ import android.os.Bundle;
+ import android.text.InputFilter;
+ import android.text.InputType;
+-import android.util.Log;
+ import android.view.View;
+ import android.view.animation.Animation;
+ import android.view.animation.AnimationUtils;
+@@ -120,7 +119,7 @@
+                     .setTitle("Select Role")
+                     .setItems(new String[]{"Faculty", "Student"}, (dialog, which) -> {
+                         if (which == 0) {
+-                            startActivity(new Intent(LoginActivity.this, FacultyCodeRegistrationActivity.class));
++                            startActivity(new Intent(LoginActivity.this, FacultyRegistrationActivity.class));
+                         } else {
+                             startActivity(new Intent(LoginActivity.this, StudentRegistrationActivity.class));
+                         }
+@@ -246,7 +245,7 @@
+                 return false;
+             }
+             if (!STAFF_CODE_PATTERN.matcher(input).matches()) {
+-                usernameEditText.setError("Staff code must be uppercase and more than 6 characters");
++                usernameEditText.setError("Staff code must be uppercase and max 6 characters");
+                 return false;
+             }
+         } else {
+@@ -306,7 +305,7 @@
+ 
+                         // Update Firestore password if the role is "Student"
+                         if (role.equals("Student")) {
+-                            updatePasswordInFirestore(email, password);
++                            //updatePasswordInFirestore(email, password);
+                         }
+                     } else {
+                         loadingDialog.dismiss();
+@@ -317,25 +316,6 @@
+                 });
+     }
+ 
+-    // Function to update password in Firestore
+-    private void updatePasswordInFirestore(String email, String newPassword) {
+-        db.collection("students")
+-                .whereEqualTo("email", email)
+-                .get()
+-                .addOnCompleteListener(task -> {
+-                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+-                        String documentId = task.getResult().getDocuments().get(0).getId();
+-                        db.collection("students").document(documentId)
+-                                .update("password", newPassword)
+-                                .addOnSuccessListener(aVoid ->
+-                                        Toast.makeText(LoginActivity.this, "Password updated in Firestore", Toast.LENGTH_SHORT).show())
+-                                .addOnFailureListener(e ->
+-                                        Toast.makeText(LoginActivity.this, "Failed to update password in Firestore", Toast.LENGTH_SHORT).show());
+-                    }
+-                });
+-    }
+-
+-
+     private void validateUserRoleFromFirestore(String role, String email) {
+         String collection = role.equals("Faculty") ? "faculty" : "students";
+         db.collection(collection)
+Index: app/src/main/java/com/example/studdy/FacultyCodeRegistrationActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/studdy/FacultyCodeRegistrationActivity.java b/app/src/main/java/com/example/studdy/FacultyRegistrationActivity.java
+rename from app/src/main/java/com/example/studdy/FacultyCodeRegistrationActivity.java
+rename to app/src/main/java/com/example/studdy/FacultyRegistrationActivity.java
+--- a/app/src/main/java/com/example/studdy/FacultyCodeRegistrationActivity.java	(revision 69d24dcac1ba16ff8e209fb78c77af1b5f848021)
++++ b/app/src/main/java/com/example/studdy/FacultyRegistrationActivity.java	(date 1741443138775)
+@@ -39,7 +39,7 @@
+ import javax.mail.internet.InternetAddress;
+ import javax.mail.internet.MimeMessage;
+ 
+-public class FacultyCodeRegistrationActivity extends AppCompatActivity {
++public class FacultyRegistrationActivity extends AppCompatActivity {
+ 
+     // Precompiled regular expressions for validation
+     private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9]{3,20}$"); // Alphanumeric, 3-20 characters
+@@ -193,7 +193,7 @@
+                         if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                             emailEditText.setError("Email already exists");
+                         } else {
+-                            Toast.makeText(FacultyCodeRegistrationActivity.this,
++                            Toast.makeText(FacultyRegistrationActivity.this,
+                                     "Registration failed: " + task.getException().getMessage(),
+                                     Toast.LENGTH_SHORT).show();
+                         }
+@@ -217,7 +217,7 @@
+                 })
+                 .addOnFailureListener(e -> {
+                     loadingDialog.dismiss();
+-                    Toast.makeText(FacultyCodeRegistrationActivity.this,
++                    Toast.makeText(FacultyRegistrationActivity.this,
+                             "Failed to save faculty data: " + e.getMessage(),
+                             Toast.LENGTH_SHORT).show();
+                 });
+@@ -269,7 +269,7 @@
+                 // Run on UI thread to update UI
+                 runOnUiThread(() -> {
+                     loadingDialog.dismiss();
+-                    Toast.makeText(FacultyCodeRegistrationActivity.this,
++                    Toast.makeText(FacultyRegistrationActivity.this,
+                             "Email sent successfully", Toast.LENGTH_LONG).show();
+                     Intent gotoLogin = new Intent(getApplicationContext(), LoginActivity.class);
+                     startActivity(gotoLogin);
+@@ -279,7 +279,7 @@
+                 // Run on UI thread to update UI
+                 runOnUiThread(() -> {
+                     loadingDialog.dismiss();
+-                    Toast.makeText(FacultyCodeRegistrationActivity.this,
++                    Toast.makeText(FacultyRegistrationActivity.this,
+                             "Failed to send email: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                 });
+             }
+@@ -293,7 +293,7 @@
+                 .setMessage("Generated staff code sent on your email")
+                 .setPositiveButton("OK", (dialog, which) -> {
+                     // Navigate to LoginActivity
+-                    startActivity(new Intent(FacultyCodeRegistrationActivity.this, LoginActivity.class));
++                    startActivity(new Intent(FacultyRegistrationActivity.this, LoginActivity.class));
+                     finish();
+                 })
+                 .setCancelable(false)
+Index: app/src/main/java/student/StudentDashboardActivity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/student/StudentDashboardActivity.java b/app/src/main/java/student/StudentDashboardActivity.java
+new file mode 100644
+--- /dev/null	(date 1741443138778)
++++ b/app/src/main/java/student/StudentDashboardActivity.java	(date 1741443138778)
+@@ -0,0 +1,26 @@
++package student;
++
++import android.os.Bundle;
++
++import androidx.activity.EdgeToEdge;
++import androidx.appcompat.app.AppCompatActivity;
++import androidx.core.graphics.Insets;
++import androidx.core.view.ViewCompat;
++import androidx.core.view.WindowInsetsCompat;
++
++import com.example.studdy.R;
++
++public class StudentDashboardActivity extends AppCompatActivity {
++
++    @Override
++    protected void onCreate(Bundle savedInstanceState) {
++        super.onCreate(savedInstanceState);
++        EdgeToEdge.enable(this);
++        setContentView(R.layout.activity_student_dashboard);
++        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
++            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
++            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
++            return insets;
++        });
++    }
++}
+\ No newline at end of file
